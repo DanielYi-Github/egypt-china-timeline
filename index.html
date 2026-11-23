@@ -1743,9 +1743,6 @@ body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
     align-items: center;
     justify-content: center;
   }
-  .mode-btn .m-hide-txt {
-    display: none;
-  }
 
   /* Full-width Search Panel when opened on mobile */
   .search-wrap {
@@ -2270,11 +2267,11 @@ body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
     flex-direction: column;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     overscroll-behavior: contain;
-    touch-action: pan-x;
+    touch-action: none;
   }
   .timeline-scroll-viewport {
     overscroll-behavior: contain;
-    touch-action: pan-x;
+    touch-action: none;
   }
   .timeline-wrapper.m-tl-open {
     display: flex;
@@ -2477,14 +2474,20 @@ body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
   .c-event-dot::after {
     content: "";
     position: absolute;
-    inset: -19px;
+    inset: -20px;
   }
-  .c-event-node.row-0 .c-event-dot::after {
-    top: -6px;
-    bottom: -32px;
-    left: -19px;
-    right: -19px;
-  }
+  .c-event-node.m-row-0 .c-event-stem { height: 22px; }
+  .c-event-node.m-row-1 .c-event-stem { height: 67px; }
+  .c-event-node.m-row-2 .c-event-stem { height: 112px; }
+  .c-event-node.m-row-3 .c-event-stem { height: 157px; }
+  .c-event-node.m-row-0 .c-event-dot { top: 22px; }
+  .c-event-node.m-row-1 .c-event-dot { top: 67px; }
+  .c-event-node.m-row-2 .c-event-dot { top: 112px; }
+  .c-event-node.m-row-3 .c-event-dot { top: 157px; }
+  .c-event-node.m-row-0 .c-event-label { top: 22px; }
+  .c-event-node.m-row-1 .c-event-label { top: 67px; }
+  .c-event-node.m-row-2 .c-event-label { top: 112px; }
+  .c-event-node.m-row-3 .c-event-label { top: 157px; }
   .c-event-label {
     pointer-events: auto;
   }
@@ -2497,18 +2500,60 @@ body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
     inset: -12px -6px;
   }
 
-  /* Toast inside full-screen timeline for tapped period/dynasty/event */
+  /* Portrait mobile: reserve fixed height for China track so all 4 event rows (dot at 157px + 22px hit radius below 45px bar) stay inside short viewports such as 393x500 (CR r5) */
+  @media (max-width: 767px) and (orientation: portrait) {
+    .china-zone {
+      flex: 0 0 232px;
+    }
+  }
+
+  /* Low-height landscape mobile (e.g. 852x393): compact header/toolbar & 2-row China events so all 9 event dots fit inside the 393px viewport with >=44x44px hit boxes (FIX_round4 #3) */
+  @media (max-height: 500px) and (pointer: coarse) and (orientation: landscape) {
+    .m-tl-modal-header,
+    .m-tl-toolbar {
+      height: 44px;
+    }
+    .egypt-zone {
+      flex: 42 1 0;
+    }
+    .shared-axis-zone {
+      flex: 0 0 26px;
+      height: 26px;
+    }
+    .china-zone {
+      flex: 58 1 0;
+    }
+    .china-dynasty-bar {
+      height: 36px;
+    }
+    .china-seg {
+      height: 34px;
+    }
+    .china-events-layer {
+      top: 37px;
+    }
+    .c-event-node.m-row-0 .c-event-stem { height: 22px; }
+    .c-event-node.m-row-1 .c-event-stem { height: 68px; }
+    .c-event-node.m-row-0 .c-event-dot { top: 22px; }
+    .c-event-node.m-row-1 .c-event-dot { top: 68px; }
+    .c-event-node.m-row-0 .c-event-label { top: 22px; }
+    .c-event-node.m-row-1 .c-event-label { top: 68px; }
+  }
+
+  /* Toast inside full-screen timeline for tapped period/dynasty/event: pointer-events: none + placed below top toolbar so it NEVER blocks any event dots or timeline targets (FIX_round4 #2) */
   .m-timeline-toast {
     position: fixed;
     left: 12px;
     right: 12px;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    top: 102px;
+    bottom: auto;
     z-index: 860;
+    pointer-events: none;
     background: rgba(15, 18, 25, 0.96);
     color: var(--text-main);
     border: 1.5px solid var(--gold);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 12px;
     font-size: 13.5px;
     font-weight: 700;
     line-height: 1.45;
@@ -2735,8 +2780,8 @@ body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
     </div>
 
     <div class="mode-switch-group" role="group" aria-label="顯示模式切換">
-      <button type="button" id="mode-star-btn" class="mode-btn" aria-pressed="false">精選<span class="m-hide-txt"> 21 位</span> ★</button>
-      <button type="button" id="mode-all-btn" class="mode-btn active" aria-pressed="true">全部<span class="m-hide-txt"> 178</span></button>
+      <button type="button" id="mode-star-btn" class="mode-btn" aria-pressed="false">精選 21 位 ★</button>
+      <button type="button" id="mode-all-btn" class="mode-btn active" aria-pressed="true">全部 178</button>
     </div>
 
     <button type="button" id="m-credits-top-btn" class="m-credits-top-btn" title="圖片來源與授權" aria-label="圖片來源與授權">ⓘ</button>
@@ -3156,6 +3201,14 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   function isMobileLayout() {
     return Boolean(mobileMediaQuery && mobileMediaQuery.matches);
   }
+  function syncModeButtonsText() {
+    const isMob = isMobileLayout();
+    const wantStar = isMob ? '精選 ★' : '精選 21 位 ★';
+    const wantAll = isMob ? '全部' : '全部 178';
+    if (modeStarBtn && modeStarBtn.textContent !== wantStar) modeStarBtn.textContent = wantStar;
+    if (modeAllBtn && modeAllBtn.textContent !== wantAll) modeAllBtn.textContent = wantAll;
+  }
+  syncModeButtonsText();
 
   const searchWrapEl = document.getElementById('search-wrap');
   const mSearchOpenBtn = document.getElementById('m-search-open-btn');
@@ -3431,35 +3484,50 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
     // 5. Fit China Major Events labels ONLY on mobile so desktop retains exact v3.1 alignment (CR #1)
     if (isMobileLayout()) {
-      // Fit China Major Events labels on mobile: keep visible events >=22px apart horizontally so their 44px touch targets don't swallow adjacent dots (CR #6)
-      const cRowLastRight = [-9999, -9999, -9999];
-      for (const evNode of chinaEventNodes) {
-        const rIdx = parseInt(evNode.dataset.row || '0', 10);
+      // Fit China Major Events labels on mobile:
+      // - In low-height landscape (innerHeight <= 500, e.g. 852x393), use 2 rows [0, 1, 0, 1, 0, 1, 0, 0, 1] so all 9 event dots fit inside the 393px viewport height AND same-row horizontal distance is >= 54px! (FIX_round4 #3)
+      // - In portrait mobile (e.g. 393x660), use 4 rows [0, 1, 2, 3, 0, 1, 2, 0, 3] at low zoom so no two same-row dots are closer than 44px on a 393px width! (FIX_round3 #2)
+      const isLowHeightMob = window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+      const mobileLowZoom = zoomLevel < 2.2;
+      const rowAssignMap = isLowHeightMob
+        ? [0, 1, 0, 1, 0, 1, 0, 0, 1]
+        : [0, 1, 2, 3, 0, 1, 2, 0, 3];
+      const cRowLastRight = [-9999, -9999, -9999, -9999];
+      chinaEventNodes.forEach((evNode, evIdx) => {
+        const origRow = parseInt(evNode.dataset.row || '0', 10);
+        let effRow = origRow;
+        if (mobileLowZoom || isLowHeightMob) {
+          effRow = rowAssignMap[evIdx] ?? origRow;
+        }
+        evNode.classList.remove('m-row-0', 'm-row-1', 'm-row-2', 'm-row-3');
+        evNode.classList.add('m-row-' + effRow);
+
         const evPct = parseFloat(evNode.dataset.pct || '0');
         const evX = (evPct / 100.0) * stageW;
         const lbl = evNode.querySelector('.c-event-label');
-        if (!lbl) continue;
+        if (!lbl) return;
         const lw = estimateTextPx(lbl.textContent, 12.0, 7.5) + 14;
         const nearRight = (evX + lw + 8 > stageW);
         evNode.classList.toggle('align-right', nearRight);
         const rawLeftPx = nearRight ? (evX - lw - 5) : (evX + 5);
         const rawRightPx = rawLeftPx + lw;
-        // Also check if another row-0 event dot lies inside [rawLeftPx - 14, rawRightPx + 14]
-        const coversOtherSameRowDot = chinaEventNodes.some(other => {
+        const coversOtherSameRowDot = chinaEventNodes.some((other, oIdx) => {
           if (other === evNode) return false;
-          if (parseInt(other.dataset.row || '0', 10) !== rIdx) return false;
+          const oRow = (mobileLowZoom || isLowHeightMob) ? (rowAssignMap[oIdx] ?? parseInt(other.dataset.row || '0', 10)) : parseInt(other.dataset.row || '0', 10);
+          if (oRow !== effRow) return false;
           const ox = (parseFloat(other.dataset.pct || '0') / 100.0) * stageW;
-          return ox >= rawLeftPx - 14 && ox <= rawRightPx + 14;
+          return ox >= rawLeftPx - 24 && ox <= rawRightPx + 24;
         });
-        if (zoomLevel < 1.8 && (rawLeftPx < cRowLastRight[rIdx] + 6 || rawLeftPx < 8 || rawRightPx > stageW - 4 || coversOtherSameRowDot)) {
+        if (mobileLowZoom || rawLeftPx < cRowLastRight[effRow] + 8 || rawLeftPx < 8 || rawRightPx > stageW - 4 || coversOtherSameRowDot) {
           lbl.style.display = 'none';
         } else {
           lbl.style.display = 'block';
-          cRowLastRight[rIdx] = Math.max(cRowLastRight[rIdx], rawRightPx);
+          cRowLastRight[effRow] = Math.max(cRowLastRight[effRow], rawRightPx);
         }
-      }
+      });
     } else {
       for (const evNode of chinaEventNodes) {
+        evNode.classList.remove('m-row-0', 'm-row-1', 'm-row-2', 'm-row-3');
         const origAlign = evNode.dataset.align || 'right';
         evNode.classList.toggle('align-right', origAlign === 'right');
         const lbl = evNode.querySelector('.c-event-label');
@@ -3492,6 +3560,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       });
       mClusterSheetList.appendChild(btn);
     });
+    hideMobileTimelineToast();
     mClusterSheetBackdrop.classList.add('open');
   }
 
@@ -4291,6 +4360,12 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     });
   }
 
+  function hideMobileTimelineToast() {
+    if (!mTimelineToast) return;
+    clearTimeout(toastTimer);
+    mTimelineToast.classList.remove('open');
+  }
+
   function showMobileTimelineToast(msg) {
     if (!mTimelineToast) return;
     mTimelineToast.textContent = msg;
@@ -4457,6 +4532,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       });
       mClusterSheetList.appendChild(btn);
     });
+    hideMobileTimelineToast();
     mClusterSheetBackdrop.classList.add('open');
   }
 
@@ -4495,10 +4571,18 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     evNode.addEventListener('click', (e) => {
       if (!isMobileLayout()) return;
       e.stopPropagation();
-      const tapX = e.clientX;
+      const dotEl = evNode.querySelector('.c-event-dot');
+      const dotR = dotEl ? dotEl.getBoundingClientRect() : evNode.getBoundingClientRect();
+      const tapX = (e.clientX && e.clientX > 0) ? e.clientX : ((dotR.left + dotR.right) / 2);
+      const tapY = (e.clientY && e.clientY > 0) ? e.clientY : ((dotR.top + dotR.bottom) / 2);
+      // Include any event whose 44x44px touch box covers (tapX, tapY) or whose horizontal distance is within 24px on the same/overlapping row
       const nearbyEvents = chinaEventNodes.filter(n => {
-        const r = n.getBoundingClientRect();
-        return Math.abs(r.left - tapX) <= 26;
+        if (n === evNode) return true;
+        const nd = n.querySelector('.c-event-dot');
+        const nr = nd ? nd.getBoundingClientRect() : n.getBoundingClientRect();
+        const ncx = (nr.left + nr.right) / 2;
+        const ncy = (nr.top + nr.bottom) / 2;
+        return Math.abs(ncx - tapX) <= 24 && Math.abs(ncy - tapY) <= 24;
       }).map(n => {
         const l = n.querySelector('.c-event-label');
         return l && l.textContent ? ('中國重大歷史事件：' + l.textContent) : '';
@@ -4660,8 +4744,17 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     viewport.classList.remove('dragging');
   });
 
-  // Pointer Events Pinch Zoom on Timeline (anchored at two-finger midpoint, supports 1-finger pan -> 2nd finger join, and resets on pointerup/pointercancel per CR #10 & RV2 #9)
+  // Unified Pointer Events 1-Finger Horizontal Pan + 2-Finger Pinch Zoom on Timeline (touch-action: none on mobile so browser never fires pointercancel during 1-finger pan -> 2-finger pinch transitions, per FIX_round3 #3)
   const activePointers = new Map();
+  let panPointerId = null;
+  let panStartX = 0;
+  let panStartScrollLeft = 0;
+  let panLastX = 0;
+  let panLastTime = 0;
+  let panVelocityX = 0;
+  let inertiaRafId = 0;
+  let pointerMovedDuringGesture = false;
+
   let pinchStartDist = 0;
   let pinchStartZoom = 1.0;
   let pinchAnchorPct = 50;
@@ -4669,12 +4762,38 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   let pinchRafPending = false;
   let pendingPinchZoom = 1.0;
 
+  function stopPanInertia() {
+    if (inertiaRafId) {
+      cancelAnimationFrame(inertiaRafId);
+      inertiaRafId = 0;
+    }
+  }
+
   function resetPinchState() {
     pinchStartDist = 0;
     pinchRafPending = false;
   }
 
+  function initSinglePointerPan() {
+    if (activePointers.size !== 1) {
+      panPointerId = null;
+      return;
+    }
+    const [pid, pt] = activePointers.entries().next().value;
+    panPointerId = pid;
+    panStartX = pt.clientX;
+    panStartScrollLeft = viewport.scrollLeft;
+    panLastX = pt.clientX;
+    panLastTime = performance.now();
+    panVelocityX = 0;
+  }
+
   function initTwoPointerPinch() {
+    stopPanInertia();
+    if (pinchRafPending) {
+      pinchRafPending = false;
+    }
+    panPointerId = null;
     const pts = Array.from(activePointers.values());
     if (pts.length < 2) return;
     const p0 = pts[0];
@@ -4689,10 +4808,36 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     pinchAnchorPct = ((viewport.scrollLeft + pinchMidViewportX) / Math.max(1, curStageW)) * 100.0;
   }
 
+  function applyPendingPinchZoomSynchronously() {
+    if (pinchStartDist <= 10 || activePointers.size < 2) return;
+    pinchRafPending = false;
+    zoomLevel = Math.round(pendingPinchZoom * 100) / 100;
+    zoomReadout.textContent = zoomLevel.toFixed(1) + '×';
+    zoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
+    if (mZoomReadout) mZoomReadout.textContent = zoomLevel.toFixed(1) + '×';
+    if (mZoomResetBtn) mZoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
+    layoutTimeline();
+    const viewW = viewport.clientWidth || window.innerWidth || 390;
+    const newStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
+    if (newStageW <= viewW) {
+      viewport.scrollLeft = 0;
+    } else {
+      viewport.scrollLeft = Math.max(0, (pinchAnchorPct / 100.0) * newStageW - pinchMidViewportX);
+    }
+  }
+
   viewport.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === 'mouse') return; // Mouse drag handled by mousedown/mousemove above
+    stopPanInertia();
+    if (activePointers.size === 0) {
+      pointerMovedDuringGesture = false;
+    }
     activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
-    if (activePointers.size === 2) {
+    if (activePointers.size === 1) {
+      resetPinchState();
+      initSinglePointerPan();
+    } else if (activePointers.size >= 2) {
+      pointerMovedDuringGesture = true;
       initTwoPointerPinch();
     }
   });
@@ -4700,7 +4845,32 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   viewport.addEventListener('pointermove', (e) => {
     if (!activePointers.has(e.pointerId)) return;
     activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
-    if (activePointers.size >= 2) {
+
+    if (activePointers.size === 1) {
+      if (panPointerId === null) {
+        panPointerId = e.pointerId;
+        panStartX = e.clientX;
+        panStartScrollLeft = viewport.scrollLeft;
+        panLastX = e.clientX;
+        panLastTime = performance.now();
+        panVelocityX = 0;
+        return;
+      }
+      if (panPointerId !== e.pointerId) return;
+      const dx = e.clientX - panStartX;
+      if (Math.abs(dx) > 4) {
+        pointerMovedDuringGesture = true;
+      }
+      viewport.scrollLeft = Math.max(0, panStartScrollLeft - dx);
+      const now = performance.now();
+      const dt = now - panLastTime;
+      if (dt > 0) {
+        panVelocityX = (e.clientX - panLastX) / dt;
+        panLastX = e.clientX;
+        panLastTime = now;
+      }
+    } else if (activePointers.size >= 2) {
+      pointerMovedDuringGesture = true;
       if (pinchStartDist <= 10) {
         initTwoPointerPinch();
       }
@@ -4716,38 +4886,79 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         if (!pinchRafPending) {
           pinchRafPending = true;
           requestAnimationFrame(() => {
-            pinchRafPending = false;
-            if (pinchStartDist <= 0 || activePointers.size < 2) return;
-            zoomLevel = Math.round(pendingPinchZoom * 100) / 100;
-            zoomReadout.textContent = zoomLevel.toFixed(1) + '×';
-            zoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
-            if (mZoomReadout) mZoomReadout.textContent = zoomLevel.toFixed(1) + '×';
-            if (mZoomResetBtn) mZoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
-            layoutTimeline();
-            const viewW = viewport.clientWidth || window.innerWidth || 390;
-            const newStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
-            if (newStageW <= viewW) {
-              viewport.scrollLeft = 0;
-            } else {
-              viewport.scrollLeft = Math.max(0, (pinchAnchorPct / 100.0) * newStageW - pinchMidViewportX);
-            }
+            applyPendingPinchZoomSynchronously();
           });
         }
       }
     }
   });
 
-  function handlePointerEndOrCancel(e) {
+  function handlePointerUp(e) {
+    if (!activePointers.has(e.pointerId) && activePointers.size >= 2) {
+      // Fallback if pointerId differs: delete the pointer closest to e.clientX
+      let bestId = null;
+      let bestDist = Infinity;
+      for (const [pid, pt] of activePointers.entries()) {
+        const d = Math.hypot(pt.clientX - e.clientX, pt.clientY - e.clientY);
+        if (d < bestDist) {
+          bestDist = d;
+          bestId = pid;
+        }
+      }
+      if (bestId !== null) {
+        if (pinchRafPending) applyPendingPinchZoomSynchronously();
+        activePointers.delete(bestId);
+        resetPinchState();
+        initSinglePointerPan();
+        return;
+      }
+    }
+    if (!activePointers.has(e.pointerId)) return;
+    if (pinchRafPending && activePointers.size >= 2) {
+      applyPendingPinchZoomSynchronously();
+    }
+    const wasSingle = activePointers.size === 1;
+    activePointers.delete(e.pointerId);
+    if (activePointers.size >= 2) {
+      initTwoPointerPinch();
+    } else if (activePointers.size === 1) {
+      // Transition seamlessly from 2-finger pinch back to 1-finger pan: anchor remaining finger immediately at its current clientX & current scrollLeft!
+      resetPinchState();
+      initSinglePointerPan();
+    } else {
+      resetPinchState();
+      panPointerId = null;
+      if (wasSingle && Math.abs(panVelocityX) > 0.25 && !prefersReducedMotion) {
+        let v = panVelocityX * 16;
+        const stepInertia = () => {
+          if (Math.abs(v) < 0.5 || activePointers.size > 0) {
+            inertiaRafId = 0;
+            return;
+          }
+          viewport.scrollLeft = Math.max(0, viewport.scrollLeft - v);
+          v *= 0.92;
+          inertiaRafId = requestAnimationFrame(stepInertia);
+        };
+        inertiaRafId = requestAnimationFrame(stepInertia);
+      }
+    }
+  }
+
+  function handlePointerCancel(e) {
     activePointers.delete(e.pointerId);
     if (activePointers.size < 2) {
       resetPinchState();
     }
+    if (activePointers.size === 1) {
+      initSinglePointerPan();
+    } else if (activePointers.size === 0) {
+      panPointerId = null;
+      stopPanInertia();
+    }
   }
-  viewport.addEventListener('pointerup', handlePointerEndOrCancel);
-  viewport.addEventListener('pointercancel', handlePointerEndOrCancel);
-  viewport.addEventListener('pointerleave', (e) => {
-    if (e.pointerType !== 'touch') handlePointerEndOrCancel(e);
-  });
+
+  viewport.addEventListener('pointerup', handlePointerUp);
+  viewport.addEventListener('pointercancel', handlePointerCancel);
 
   // Automated Self-Audit Mode (#audit or ?audit=1) for Acceptance #3 & #5
   async function runAutomatedAudit() {
@@ -4876,6 +5087,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
   window.addEventListener('hashchange', applyUrlState);
   window.addEventListener('resize', () => {
+    syncModeButtonsText();
     layoutTimeline();
     updateScrollMetrics();
   });
