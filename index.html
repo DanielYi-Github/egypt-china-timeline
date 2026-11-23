@@ -1167,6 +1167,10 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
   opacity: 0.15;
   pointer-events: none;
 }
+body.star-only-mode .pharaoh-node.is-selected[data-star="false"] {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 /* Shared Year Axis (30px height) */
 .shared-axis-zone {
@@ -1402,7 +1406,7 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
 .beam-axis-pill {
   position: absolute;
   left: 50%;
-  top: calc(var(--axis-center-y, 56%) - 24px);
+  top: 50%;
   transform: translate(-50%, -50%);
   background: #2b210d;
   color: var(--gold-bright);
@@ -1414,6 +1418,8 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
   white-space: nowrap;
   box-shadow: 0 0 10px rgba(230, 184, 76, 0.85);
   z-index: 80;
+  pointer-events: none;
+  transition: left 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms ease;
 }
 
 /* Floating Hover Tooltip */
@@ -1518,6 +1524,64 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
   word-break: break-all;
 }
 
+/* Desktop default: hide mobile-only elements */
+.m-only,
+.m-jump-bar,
+.m-bottom-dock,
+.m-cluster-sheet-backdrop,
+.m-timeline-toast,
+.m-tl-modal-header,
+.m-tl-toolbar,
+.m-img-controls-row,
+.m-china-summary-row,
+.m-credits-inline-btn,
+.m-search-open-btn,
+.m-credits-top-btn,
+.m-search-close-btn {
+  display: none;
+}
+
+.pharaoh-nodes-layer {
+  pointer-events: none;
+}
+.pharaoh-node {
+  pointer-events: auto;
+}
+.cluster-badge-node {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  z-index: 42;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.cluster-pill {
+  position: absolute;
+  top: var(--cluster-y, 64px);
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 26px;
+  padding: 2px 8px;
+  background: rgba(32, 39, 54, 0.96);
+  color: var(--gold-bright);
+  border: 1.5px solid var(--gold);
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+}
+.cluster-pill::after {
+  content: "";
+  position: absolute;
+  inset: -10px -4px;
+}
+
 .credits-dialog {
   position: relative;
   width: min(1040px, 94vw);
@@ -1583,180 +1647,1059 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
 }
 
 /* ==========================================================================
-   4. Mobile Responsive Layout (< 768px)
+   4. Mobile Responsive Layout: (max-width: 767px), (max-height: 500px) and (pointer: coarse)
    ========================================================================== */
-@media (max-width: 767px) {
-  .app-shell {
-    width: min(100vw, 390px);
-    max-width: min(100vw, 390px);
-    overflow-x: hidden;
-  }
-  .topbar {
-    flex: 0 0 40px;
-    height: 40px;
+@media (max-width: 767px), (max-height: 500px) and (pointer: coarse) {
+  html {
     width: 100%;
     max-width: 100%;
-    padding: 0 6px;
-    gap: 4px;
-    overflow: hidden;
+    height: auto;
+    min-height: 100svh;
+    overflow-x: clip;
+    overflow-y: auto;
   }
-  .brand-title {
-    font-size: 12px;
-  }
-  .search-wrap {
-    flex: 1 1 70px;
-    width: auto;
-    min-width: 60px;
-  }
-  .search-input {
-    height: 25px;
-    font-size: 12px;
-    padding: 0 6px;
-  }
-  .search-kbd-hint,
-  .jump-group {
-    display: none;
-  }
-  .mode-btn {
-    padding: 2px 5px;
-    font-size: 11px;
+  body {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
   }
 
-  /* Story stage on mobile: single column, vertically scrollable, >= 3:4 image (~290px high) */
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .d-only {
+    display: none !important;
+  }
+
+  /* 1. Sticky Topbar + Horizontal Period Quick Jump Bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    flex: 0 0 auto;
+    height: 48px;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 8px;
+    gap: 6px;
+    overflow: visible;
+    z-index: 400;
+  }
+
+  .brand-title .brand-full {
+    display: none;
+  }
+  .brand-title .brand-short {
+    display: inline !important;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--gold-bright);
+  }
+
+  .m-search-open-btn,
+  .m-credits-top-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(230, 184, 76, 0.4);
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .m-credits-top-btn {
+    font-size: 16px;
+    color: var(--gold-bright);
+  }
+
+  .mode-switch-group {
+    margin-left: auto;
+    border-radius: 7px;
+    overflow: visible;
+  }
+  .mode-btn {
+    min-height: 44px;
+    min-width: 56px;
+    padding: 0 9px;
+    font-size: 12.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mode-btn .m-hide-txt {
+    display: none;
+  }
+
+  /* Full-width Search Panel when opened on mobile */
+  .search-wrap {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #121621;
+    padding: 6px 10px;
+    border-bottom: 1.5px solid var(--gold);
+    z-index: 750;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-wrap.m-search-open {
+    display: flex;
+  }
+  .search-input {
+    flex: 1 1 auto;
+    height: 44px;
+    font-size: 16px;
+    padding: 0 12px;
+    border-radius: 8px;
+  }
+  .search-kbd-hint {
+    display: none;
+  }
+  .m-search-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .search-dropdown {
+    position: fixed;
+    top: 57px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    z-index: 760;
+  }
+  .search-item {
+    min-height: 48px;
+    padding: 9px 12px;
+    justify-content: center;
+  }
+  .search-item-top {
+    font-size: 14px;
+  }
+  .search-item-sub {
+    font-size: 12.5px;
+  }
+
+  /* Desktop jump-group inside topbar hidden; replaced by sticky second row .m-jump-bar */
+  .topbar .jump-group {
+    display: none;
+  }
+  .m-jump-bar {
+    position: sticky;
+    top: 48px;
+    z-index: 390;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    height: 46px;
+    padding: 0 8px;
+    background: #151a26;
+    border-bottom: 1px solid rgba(230, 184, 76, 0.22);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .m-jump-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .m-jump-bar .jump-btn {
+    min-height: 44px;
+    padding: 0 11px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .m-jump-bar .jump-btn.active-period {
+    background: rgba(230, 184, 76, 0.22);
+    color: var(--gold-bright);
+    border-color: var(--gold);
+  }
+
+  /* 2. Story Main Stage: Natural Document Flow & Ordered Content */
   .story-stage {
-    flex: 1 1 0;
+    flex: 0 0 auto;
+    height: auto;
     min-height: 0;
     width: 100%;
     max-width: 100%;
-    padding: 6px 8px;
-    overflow-x: hidden;
-    overflow-y: auto;
+    padding: 10px 12px 18px;
+    overflow: visible;
     display: block;
+    border-bottom: none;
   }
   .stage-nav-btn {
-    top: 145px;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 44px;
-    font-size: 20px;
+    display: none !important;
   }
-  .stage-nav-prev { left: 12px; }
-  .stage-nav-next { right: 12px; }
 
+  /* Flatten grid/columns with display:contents so children can be ordered per SPEC #3 */
   .stage-inner {
     display: flex;
     flex-direction: column;
     width: 100%;
     max-width: 100%;
     height: auto;
-    gap: 6px;
+    gap: 8px;
   }
-  .stage-left-col {
+  .stage-left-col,
+  .stage-right-wrap,
+  .stage-right-scroll {
+    display: contents;
+  }
+  .stage-scroll-fade {
+    display: none !important;
+  }
+
+  /* Explicit mobile visual order:
+     1: Badges (.stage-meta-row)
+     2: Pharaoh Name (~24px) + Year (.stage-title-row)
+     3: Oneliner (.stage-oneliner)
+     4: China 1-line Summary button (.m-china-summary-row)
+     5: Image box (.stage-img-box)
+     6: Below image: Prev 1/3 Next + Zoom (.m-img-controls-row)
+     7: 2-line Caption (.stage-img-caption)
+     8: Deeds (.stage-deeds-block)
+     9: Story (.stage-story-block)
+     10: China compare card (.china-compare-card)
+     11: Bible (.stage-bible-box)
+     12: Sources (.stage-sources-details)
+     13: Credits trigger (.m-credits-inline-btn)
+  */
+  .stage-meta-row { order: 1; }
+  .stage-title-row { order: 2; gap: 8px; }
+  .stage-oneliner { order: 3; font-size: 15px; line-height: 1.5; }
+  .m-china-summary-row {
+    order: 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     width: 100%;
-    max-width: 100%;
-    height: auto;
-    gap: 4px;
+    min-height: 44px;
+    padding: 6px 10px;
+    background: linear-gradient(135deg, rgba(217, 96, 69, 0.2), rgba(230, 184, 76, 0.12));
+    border: 1px solid rgba(217, 96, 69, 0.65);
+    border-radius: 7px;
+    color: var(--text-main);
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
   }
+  .m-china-summary-row .m-cs-tag {
+    background: var(--china-accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .m-china-summary-row .m-cs-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--gold-bright);
+  }
+  .m-china-summary-row .m-cs-act {
+    font-size: 12px;
+    color: var(--text-main);
+    background: rgba(15, 18, 25, 0.65);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 5px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+
   .stage-img-box {
+    order: 5;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    min-height: 290px;
-    max-height: none;
+    aspect-ratio: 16 / 10;
+    min-height: 0;
+    max-height: 220px;
   }
   .stage-main-img {
     object-fit: contain;
     background: #0b0d13;
   }
-  .img-cycle-btn {
-    top: auto;
-    bottom: 8px;
-    transform: none;
-    width: 28px;
-    height: 28px;
-  }
-  .stage-img-caption {
-    max-width: 100%;
-    font-size: 12px;
-  }
-  .stage-right-wrap {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    overflow: visible;
-  }
-  .stage-right-scroll {
-    overflow-y: visible;
-    padding: 0;
-    gap: 4px;
-  }
-  .stage-scroll-fade {
-    display: none;
-  }
-  .stage-pharaoh-name {
-    font-size: 20px;
-  }
-  .stage-oneliner {
-    font-size: 13px;
-  }
-  .stage-block {
-    padding: 4px 8px;
-  }
-  .stage-body-text {
-    font-size: 12.5px;
-    line-height: 1.38;
-  }
-  .china-compare-card {
-    padding: 4px 8px;
-    gap: 8px;
-  }
-  .china-thumb-wrap {
-    flex: 0 0 52px;
-    width: 52px;
-    height: 39px;
-  }
-  .china-card-text {
-    font-size: 12.5px;
-    line-height: 1.36;
+  /* Remove overlaid arrows and dots from inside the image on mobile */
+  .img-cycle-btn,
+  .img-dots-bar,
+  .zoom-hint-pill {
+    display: none !important;
   }
 
-  /* Fixed Bottom Mini Dual-Track Timeline (184px height) */
-  .timeline-wrapper {
-    flex: 0 0 184px;
-    height: 184px;
+  .m-img-controls-row {
+    order: 6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
   }
-  .timeline-floating-bar {
-    top: 2px;
-    right: 6px;
+  .m-img-switcher-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .m-img-ctrl-btn {
+    min-height: 44px;
+    min-width: 68px;
+    padding: 0 11px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(230, 184, 76, 0.4);
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .m-img-ctrl-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .m-img-counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold-bright);
+    min-width: 44px;
+    text-align: center;
+  }
+
+  .stage-img-caption {
+    order: 7;
+    max-width: 100%;
+    font-size: 12.5px;
+    line-height: 1.45;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    padding: 0 2px;
+  }
+
+  .stage-deeds-block { order: 8; }
+  .stage-story-block { order: 9; }
+  .china-compare-card { order: 10; padding: 10px 12px; gap: 10px; }
+  .stage-bible-box { order: 11; font-size: 15px; line-height: 1.65; padding: 8px 12px; }
+  .stage-sources-details { order: 12; padding: 0; font-size: 13.5px; }
+  .stage-sources-details summary {
+    min-height: 44px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+  }
+  .sources-list {
+    padding: 0 12px 10px 26px;
+  }
+  .m-credits-inline-btn {
+    order: 13;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 14px;
+    background: var(--bg-sec);
+    color: var(--gold-bright);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* Typography standards: Pharaoh name ~24px, body text 15-16px, line-height 1.6-1.7 */
+  .stage-pharaoh-name {
+    font-size: 24px;
+  }
+  .stage-pharaoh-year {
+    font-size: 15px;
+  }
+  .stage-block {
+    padding: 10px 12px;
+  }
+  .stage-sec-title {
+    font-size: 13px;
+  }
+  .stage-body-text {
+    font-size: 15.5px;
+    line-height: 1.68;
+    max-width: 100%;
+  }
+  .china-thumb-wrap {
+    flex: 0 0 68px;
+    width: 68px;
+    height: 52px;
+  }
+  .china-dynasty-name {
+    font-size: 13px;
+  }
+  .china-card-text {
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
+  /* 3. Persistent Bottom Dock (<= 128px total including safe-area, strictly 100% opaque per FIX_round2 #11) */
+  .m-bottom-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 450;
+    background: #10141e;
+    border-top: 1.5px solid rgba(230, 184, 76, 0.5);
+    box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.85);
+    padding: 3px 8px calc(4px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 128px;
+  }
+  .m-dock-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    height: 44px;
+  }
+  .m-dock-nav-btn {
+    min-width: 78px;
+    min-height: 44px;
+    padding: 0 10px;
+    background: var(--bg-sec);
+    color: var(--gold-bright);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .m-dock-current {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+  }
+  .m-dock-name {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .m-dock-year {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold-bright);
+    white-space: nowrap;
+  }
+
+  /* Mini Dual-Track Overview Bar (~58px) */
+  .m-mini-overview {
+    position: relative;
+    width: 100%;
+    height: 58px;
+    min-height: 44px;
+    background: #0c0f16;
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    text-align: left;
+    font-family: inherit;
+  }
+  .m-mini-track {
+    position: relative;
+    width: 100%;
+    height: 17px;
+    overflow: hidden;
+  }
+  .m-mini-mid-bar {
+    position: relative;
+    width: 100%;
+    height: 22px;
+    background: rgba(15, 18, 25, 0.92);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7px;
+    z-index: 6;
+  }
+  .m-mini-match-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--gold-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-mini-expand-hint {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-main);
+    background: rgba(230, 184, 76, 0.2);
+    border: 1px solid rgba(230, 184, 76, 0.5);
+    border-radius: 4px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .m-mini-seg {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    border-left: 1px solid;
+    border-right: 1px solid;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .m-mini-seg.is-active-mini {
+    filter: brightness(1.35);
+    box-shadow: inset 0 0 0 1.5px var(--gold-bright);
+    z-index: 3;
+  }
+  .m-mini-beam {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2.5px;
+    background: var(--gold-bright);
+    box-shadow: 0 0 10px var(--gold-bright), 0 0 16px var(--gold);
+    transform: translateX(-50%);
+    z-index: 8;
+    pointer-events: none;
+  }
+  .m-mini-beam::before,
+  .m-mini-beam::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--gold-bright);
+  }
+  .m-mini-beam::before { top: 1px; }
+  .m-mini-beam::after { bottom: 1px; }
+
+  /* 4. Full-Screen Timeline Modal Panel (100dvh) */
+  .timeline-wrapper {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    z-index: 800;
+    background: var(--bg-dark);
+    display: none;
+    flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overscroll-behavior: contain;
+    touch-action: pan-x;
+  }
+  .timeline-scroll-viewport {
+    overscroll-behavior: contain;
+    touch-action: pan-x;
+  }
+  .timeline-wrapper.m-tl-open {
+    display: flex;
+  }
+  .timeline-floating-bar,
+  .credits-trigger-btn {
+    display: none !important;
+  }
+
+  .m-tl-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 48px;
+    padding: 0 10px;
+    background: #121621;
+    border-bottom: 1px solid rgba(230, 184, 76, 0.3);
+    flex-shrink: 0;
+  }
+  .m-tl-modal-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--gold-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-tl-close-btn {
+    min-width: 68px;
+    min-height: 44px;
+    padding: 0 12px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    font-size: 13.5px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Independent Toolbar (NOT overlapping period bands) */
+  .m-tl-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    height: 50px;
+    padding: 0 8px;
+    background: #171c29;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+  }
+  .m-tl-period-select {
+    flex: 1 1 auto;
+    min-width: 108px;
+    height: 44px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    padding: 0 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: inherit;
+  }
+  .m-tl-zoom-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .m-tl-zbtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(230, 184, 76, 0.45);
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .m-tl-zbtn.active {
+    background: var(--gold);
+    color: #151109;
+  }
+  .m-tl-zreadout {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--gold-bright);
+    min-width: 38px;
+    text-align: center;
+  }
+
+  .timeline-stage {
+    min-width: 100%;
   }
   .egypt-zone {
-    flex: 64 1 0;
+    flex: 52 1 0;
   }
-  .tip-subbar-layer {
-    display: none;
-  }
-  .p-label,
-  .pharaoh-node.is-star .p-label {
-    height: 19px;
-    padding: 0 5px 0 4px;
-  }
-  .pharaoh-node.is-star .p-name {
-    font-size: 12px;
-  }
-  .shared-axis-zone {
-    flex: 0 0 24px;
+  .egypt-period-bar {
     height: 24px;
   }
+  .period-seg {
+    height: 21px;
+    cursor: pointer;
+  }
+  .period-seg::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -12px;
+    bottom: -12px;
+  }
+  .tip-subbar-layer {
+    display: block;
+    top: 24px;
+    height: 17px;
+  }
+  .tip-dyn-bar {
+    height: 15px;
+    cursor: pointer;
+  }
+  .tip-dyn-bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: -30px;
+  }
+  .p-label {
+    height: 24px;
+    padding: 1px 7px 1px 6px;
+    transform: translate(var(--lbl-shift-x, 0px), -50%);
+  }
+  .p-label::after {
+    content: "";
+    position: absolute;
+    inset: -11px -6px;
+  }
+  .p-dot-marker::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+  }
+  /* When non-★ nodes are dot-only on mobile, hide their floating circle dot and rely on the bottom density dot + >=44px cluster pills */
+  .pharaoh-node.is-dot-only .p-dot-marker {
+    display: none !important;
+  }
+  .p-name {
+    font-size: 12.5px;
+  }
+  .pharaoh-node.is-star .p-label {
+    height: 25px;
+  }
+  .pharaoh-node.is-star .p-name {
+    font-size: 13px;
+  }
+  .shared-axis-zone {
+    flex: 0 0 30px;
+    height: 30px;
+  }
   .china-zone {
-    flex: 36 1 0;
+    flex: 48 1 0;
   }
   .china-dynasty-bar {
-    height: 36px;
+    height: 44px;
   }
   .china-seg {
-    height: 32px;
+    height: 42px;
+    cursor: pointer;
+  }
+  .china-seg::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -4px;
+    bottom: -4px;
   }
   .china-events-layer {
+    display: block;
+    top: 45px;
+  }
+  .c-event-node {
+    cursor: pointer;
+  }
+  .c-event-dot::after {
+    content: "";
+    position: absolute;
+    inset: -19px;
+  }
+  .c-event-node.row-0 .c-event-dot::after {
+    top: -6px;
+    bottom: -32px;
+    left: -19px;
+    right: -19px;
+  }
+  .c-event-label {
+    pointer-events: auto;
+  }
+  .c-event-dot {
+    pointer-events: auto;
+  }
+  .c-event-label::after {
+    content: "";
+    position: absolute;
+    inset: -12px -6px;
+  }
+
+  /* Toast inside full-screen timeline for tapped period/dynasty/event */
+  .m-timeline-toast {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 860;
+    background: rgba(15, 18, 25, 0.96);
+    color: var(--text-main);
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.45;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
     display: none;
+  }
+  .m-timeline-toast.open {
+    display: block;
+  }
+
+  /* Cluster Bottom Sheet for selecting grouped pharaohs (>=44px rows) */
+  .m-cluster-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 880;
+    background: rgba(8, 10, 15, 0.78);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .m-cluster-sheet-backdrop.open {
+    display: flex;
+  }
+  .m-cluster-sheet {
+    width: 100%;
+    max-height: 72dvh;
+    background: var(--bg-card);
+    border-top: 2px solid var(--gold);
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .m-cluster-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .m-cluster-sheet-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--gold-bright);
+  }
+  .m-cluster-sheet-close {
+    min-width: 64px;
+    min-height: 44px;
+    padding: 0 10px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .m-cluster-sheet-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 6px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .m-cluster-item-btn {
+    width: 100%;
+    min-height: 46px;
+    padding: 8px 12px;
+    background: var(--bg-sec);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .m-cluster-item-btn.is-current {
+    border-color: var(--gold-bright);
+    background: rgba(230, 184, 76, 0.18);
+  }
+
+  /* 5. Lightbox & Credits Modals on Mobile: 44px close btn, no (Esc), stacked cards */
+  .modal-backdrop {
+    padding: 10px;
+  }
+  .modal-close-btn .esc-hint {
+    display: none;
+  }
+  .modal-close-btn {
+    position: static;
+    min-width: 68px;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 13.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .lightbox-dialog {
+    width: 100%;
+    max-width: 96vw;
+    max-height: 92dvh;
+    padding: 12px;
+    overflow-y: auto;
+    align-items: stretch;
+  }
+  .lightbox-header-bar,
+  .credits-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .lightbox-img-wrap {
+    max-width: 100%;
+    max-height: 50dvh;
+    flex-shrink: 0;
+  }
+  .lightbox-img {
+    max-width: 100%;
+    max-height: 50dvh;
+  }
+  .lightbox-meta {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    font-size: 13.5px;
+  }
+  .lightbox-meta .lb-sub {
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+  #lightbox-source {
+    word-break: break-all;
+  }
+
+  .credits-dialog {
+    width: 100%;
+    max-width: 96vw;
+    max-height: 92dvh;
+    padding: 12px;
+  }
+  .credits-title {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .credits-table thead {
+    display: none;
+  }
+  .credits-table,
+  .credits-table tbody,
+  .credits-table tr,
+  .credits-table td {
+    display: block;
+    width: 100%;
+  }
+  .credits-table tr {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .credits-table td {
+    padding: 0;
+    border: none;
+    overflow-wrap: break-word;
+    word-break: normal;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .credits-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin-right: 6px;
+  }
+  .credits-table .c-url {
+    word-break: break-all;
   }
 }
 
@@ -1765,9 +2708,10 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0ms !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }
@@ -1778,24 +2722,34 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
   <!-- 1. Top Header Bar (<= 52px) -->
   <header class="topbar">
     <div class="brand-group">
-      <h1 class="brand-title">古埃及法老 × 中國朝代</h1>
+      <h1 class="brand-title"><span class="brand-full">古埃及法老 × 中國朝代</span><span class="brand-short" style="display:none">法老 × 中國</span></h1>
     </div>
 
-    <div class="search-wrap">
+    <button type="button" id="m-search-open-btn" class="m-search-open-btn" aria-label="開啟搜尋">🔍 搜尋</button>
+
+    <div id="search-wrap" class="search-wrap">
       <input type="search" id="search-input" class="search-input" placeholder="搜尋法老／王朝／中國朝代..." aria-label="搜尋法老、王朝或中國朝代" autocomplete="off">
       <span class="search-kbd-hint">/</span>
+      <button type="button" id="m-search-close-btn" class="m-search-close-btn" aria-label="關閉搜尋">取消</button>
       <div id="search-dropdown" class="search-dropdown" role="listbox"></div>
     </div>
 
     <div class="mode-switch-group" role="group" aria-label="顯示模式切換">
-      <button type="button" id="mode-star-btn" class="mode-btn" aria-pressed="false">精選 21 位 ★</button>
-      <button type="button" id="mode-all-btn" class="mode-btn active" aria-pressed="true">全部 178</button>
+      <button type="button" id="mode-star-btn" class="mode-btn" aria-pressed="false">精選<span class="m-hide-txt"> 21 位</span> ★</button>
+      <button type="button" id="mode-all-btn" class="mode-btn active" aria-pressed="true">全部<span class="m-hide-txt"> 178</span></button>
     </div>
+
+    <button type="button" id="m-credits-top-btn" class="m-credits-top-btn" title="圖片來源與授權" aria-label="圖片來源與授權">ⓘ</button>
 
     <nav class="jump-group" aria-label="時期快速跳轉">
       <button type="button" class="jump-btn" data-pct="0.000" data-zoom="2.8" data-rep="9" style="border-bottom:2.5px solid #c47d38">史前・原王朝</button><button type="button" class="jump-btn" data-pct="12.709" data-zoom="3.0" data-rep="13" style="border-bottom:2.5px solid #c47d38">早王朝</button><button type="button" class="jump-btn" data-pct="24.318" data-zoom="3.0" data-rep="34" style="border-bottom:2.5px solid #d69a2c">古王國</button><button type="button" class="jump-btn" data-pct="38.480" data-zoom="3.8" data-rep="56" style="border-bottom:2.5px solid #7a8494">第一中間期</button><button type="button" class="jump-btn" data-pct="42.013" data-zoom="3.2" data-rep="61" style="border-bottom:2.5px solid #2f9b79">中王國</button><button type="button" class="jump-btn" data-pct="49.781" data-zoom="3.8" data-rep="72" style="border-bottom:2.5px solid #8c7399">第二中間期</button><button type="button" class="jump-btn" data-pct="56.175" data-zoom="3.5" data-rep="96" style="border-bottom:2.5px solid #d95b38">新王國</button><button type="button" class="jump-btn" data-pct="69.635" data-zoom="4.0" data-rep="138" style="border-bottom:2.5px solid #4682b4">第三中間期</button><button type="button" class="jump-btn" data-pct="81.021" data-zoom="3.5" data-rep="141" style="border-bottom:2.5px solid #7a68ae">晚期王朝</button><button type="button" class="jump-btn" data-pct="90.331" data-zoom="5.0" data-rep="163" style="border-bottom:2.5px solid #3898a8">馬其頓</button><button type="button" class="jump-btn" data-pct="91.088" data-zoom="4.0" data-rep="177" style="border-bottom:2.5px solid #c24e78">托勒密</button>
     </nav>
   </header>
+
+  <!-- Mobile Second Row: Horizontal Period Quick Jump Capsules -->
+  <nav id="m-jump-bar" class="m-jump-bar" aria-label="手機版時期快速跳轉">
+    <button type="button" class="jump-btn" data-pct="0.000" data-zoom="2.8" data-rep="9" style="border-bottom:2.5px solid #c47d38">史前・原王朝</button><button type="button" class="jump-btn" data-pct="12.709" data-zoom="3.0" data-rep="13" style="border-bottom:2.5px solid #c47d38">早王朝</button><button type="button" class="jump-btn" data-pct="24.318" data-zoom="3.0" data-rep="34" style="border-bottom:2.5px solid #d69a2c">古王國</button><button type="button" class="jump-btn" data-pct="38.480" data-zoom="3.8" data-rep="56" style="border-bottom:2.5px solid #7a8494">第一中間期</button><button type="button" class="jump-btn" data-pct="42.013" data-zoom="3.2" data-rep="61" style="border-bottom:2.5px solid #2f9b79">中王國</button><button type="button" class="jump-btn" data-pct="49.781" data-zoom="3.8" data-rep="72" style="border-bottom:2.5px solid #8c7399">第二中間期</button><button type="button" class="jump-btn" data-pct="56.175" data-zoom="3.5" data-rep="96" style="border-bottom:2.5px solid #d95b38">新王國</button><button type="button" class="jump-btn" data-pct="69.635" data-zoom="4.0" data-rep="138" style="border-bottom:2.5px solid #4682b4">第三中間期</button><button type="button" class="jump-btn" data-pct="81.021" data-zoom="3.5" data-rep="141" style="border-bottom:2.5px solid #7a68ae">晚期王朝</button><button type="button" class="jump-btn" data-pct="90.331" data-zoom="5.0" data-rep="163" style="border-bottom:2.5px solid #3898a8">馬其頓</button><button type="button" class="jump-btn" data-pct="91.088" data-zoom="4.0" data-rep="177" style="border-bottom:2.5px solid #c24e78">托勒密</button>
+  </nav>
 
   <!-- 2. Story Main Stage (~52% height) -->
   <section id="story-stage" class="story-stage" aria-label="圖文故事主舞台">
@@ -1812,6 +2766,15 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
           <button type="button" id="img-next-btn" class="img-cycle-btn img-cycle-next" title="下一張圖" aria-label="下一張圖">›</button>
           <img id="stage-main-img" class="stage-main-img" src="img/013_narmer_palette.jpg" alt="納爾邁" loading="lazy">
           <div id="img-dots-bar" class="img-dots-bar"></div>
+        </div>
+        <!-- Mobile Below-Image Switcher & Zoom Controls -->
+        <div id="m-img-controls-row" class="m-img-controls-row">
+          <div id="m-img-switcher-group" class="m-img-switcher-group">
+            <button type="button" id="m-img-prev-btn" class="m-img-ctrl-btn" aria-label="上一張圖片">上一張</button>
+            <span id="m-img-counter" class="m-img-counter">1 / 1</span>
+            <button type="button" id="m-img-next-btn" class="m-img-ctrl-btn" aria-label="下一張圖片">下一張</button>
+          </div>
+          <button type="button" id="m-img-zoom-btn" class="m-img-ctrl-btn" aria-label="放大檢視圖片">🔍 放大</button>
         </div>
         <div id="stage-img-caption" class="stage-img-caption">
           <strong id="stage-img-title"></strong> — <span id="stage-img-credit"></span>
@@ -1835,14 +2798,21 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
 
           <div id="stage-oneliner" class="stage-oneliner" style="display:none"></div>
 
-          <div class="stage-block">
+          <!-- Mobile 1-Line China Synchronous Summary (click to open full-screen timeline) -->
+          <button type="button" id="m-china-summary-btn" class="m-china-summary-row" aria-label="展開雙軌時間軸對照">
+            <span class="m-cs-tag">中國同期</span>
+            <span id="m-china-summary-text" class="m-cs-main"></span>
+            <span class="m-cs-act">時間軸 ▸</span>
+          </button>
+
+          <div class="stage-block stage-deeds-block">
             <div class="stage-sec-header">
               <span class="stage-sec-title">代表性事蹟</span>
             </div>
             <p id="stage-deeds" class="stage-body-text"></p>
           </div>
 
-          <div class="stage-block">
+          <div class="stage-block stage-story-block">
             <div class="stage-sec-header">
               <span class="stage-sec-title">【當時的故事】</span>
               <span id="stage-conf-low" class="conf-low-badge" style="display:none">部分內容為一說，學界仍有討論</span>
@@ -1871,14 +2841,70 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
             <summary id="stage-sources-summary">資料來源</summary>
             <ul id="stage-sources-list" class="sources-list"></ul>
           </details>
+
+          <button type="button" id="m-credits-inline-btn" class="m-credits-inline-btn">ⓘ 檢視全部圖片來源與授權清單</button>
         </div>
         <div id="stage-scroll-fade" class="stage-scroll-fade"></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. Dual-Track Semantic Zoom Timeline (~42% height) -->
-  <section class="timeline-wrapper" aria-label="雙軌語意縮放時間軸">
+  <!-- Mobile Persistent Bottom Dock (<= 128px) -->
+  <aside id="m-bottom-dock" class="m-bottom-dock" aria-label="法老切換與迷你雙軌全覽">
+    <div class="m-dock-nav-row">
+      <button type="button" id="m-dock-prev-btn" class="m-dock-nav-btn" aria-label="上一位法老">‹ 上一位</button>
+      <div class="m-dock-current">
+        <span id="m-dock-name" class="m-dock-name">納爾邁</span>
+        <span id="m-dock-year" class="m-dock-year">約前 3100</span>
+      </div>
+      <button type="button" id="m-dock-next-btn" class="m-dock-nav-btn" aria-label="下一位法老">下一位 ›</button>
+    </div>
+    <button type="button" id="m-mini-overview-btn" class="m-mini-overview" aria-label="點擊展開全螢幕雙軌時間軸">
+      <div id="m-mini-beam" class="m-mini-beam"></div>
+      <div class="m-mini-track m-mini-egypt-track">
+        <div class="m-mini-seg m-mini-egypt-seg" data-period="史前時期（原王朝）" style="left:0.000%;width:6.116%;background:#ad8e6866;border-color:#ad8e68">原朝</div><div class="m-mini-seg m-mini-egypt-seg" data-period="早王朝時期" style="left:6.116%;width:12.661%;background:#c47d3866;border-color:#c47d38">早王朝</div><div class="m-mini-seg m-mini-egypt-seg" data-period="古王國" style="left:18.777%;width:15.443%;background:#d69a2c66;border-color:#d69a2c">古王國</div><div class="m-mini-seg m-mini-egypt-seg" data-period="第一中間期" style="left:34.220%;width:3.853%;background:#7a849466;border-color:#7a8494">一中</div><div class="m-mini-seg m-mini-egypt-seg" data-period="中王國" style="left:38.073%;width:8.471%;background:#2f9b7966;border-color:#2f9b79">中王</div><div class="m-mini-seg m-mini-egypt-seg" data-period="第二中間期" style="left:46.544%;width:6.972%;background:#8c739966;border-color:#8c7399">二中</div><div class="m-mini-seg m-mini-egypt-seg" data-period="新王國" style="left:53.517%;width:14.679%;background:#d95b3866;border-color:#d95b38">新王國</div><div class="m-mini-seg m-mini-egypt-seg" data-period="第三中間期" style="left:68.196%;width:12.416%;background:#4682b466;border-color:#4682b4">第三中間期</div><div class="m-mini-seg m-mini-egypt-seg" data-period="晚期王朝" style="left:80.612%;width:10.153%;background:#7a68ae66;border-color:#7a68ae">晚期王朝</div><div class="m-mini-seg m-mini-egypt-seg" data-period="馬其頓統治" style="left:90.765%;width:0.826%;background:#3898a866;border-color:#3898a8">馬</div><div class="m-mini-seg m-mini-egypt-seg" data-period="托勒密王朝" style="left:91.590%;width:8.410%;background:#c24e7866;border-color:#c24e78">托勒密</div>
+      </div>
+      <div class="m-mini-mid-bar">
+        <span id="m-mini-match-label" class="m-mini-match-label">早王朝時期 ⇄ 新石器文化</span>
+        <span class="m-mini-expand-hint">展開時間軸 ⤢</span>
+      </div>
+      <div class="m-mini-track m-mini-china-track">
+        <div class="m-mini-seg m-mini-china-seg" data-band-id="neolithic" style="left:0.000%;width:37.615%;background:#6d834766;border-color:#6d8347">新石器文化</div><div class="m-mini-seg m-mini-china-seg" data-band-id="xia" style="left:37.615%;width:14.373%;background:#b5854b66;border-color:#b5854b">夏</div><div class="m-mini-seg m-mini-china-seg" data-band-id="shang_early" style="left:51.988%;width:9.174%;background:#c85a3266;border-color:#c85a32">商前期</div><div class="m-mini-seg m-mini-china-seg" data-band-id="shang_late" style="left:61.162%;width:7.768%;background:#a8381b66;border-color:#a8381b">商後</div><div class="m-mini-seg m-mini-china-seg" data-band-id="west_zhou" style="left:68.930%;width:8.410%;background:#2f856866;border-color:#2f8568">西周</div><div class="m-mini-seg m-mini-china-seg" data-band-id="spring_autumn" style="left:77.370%;width:8.991%;background:#3b78a866;border-color:#3b78a8">春秋</div><div class="m-mini-seg m-mini-china-seg" data-band-id="warring_states" style="left:86.391%;width:7.768%;background:#6c5ba766;border-color:#6c5ba7">戰國</div><div class="m-mini-seg m-mini-china-seg" data-band-id="qin" style="left:94.159%;width:0.428%;background:#b83b5e66;border-color:#b83b5e">秦</div><div class="m-mini-seg m-mini-china-seg" data-band-id="west_han" style="left:94.587%;width:5.413%;background:#c93b3b66;border-color:#c93b3b">西漢</div>
+      </div>
+    </button>
+  </aside>
+
+  <!-- 3. Dual-Track Semantic Zoom Timeline (~42% height on desktop; 100dvh full-screen modal on mobile) -->
+  <section id="timeline-wrapper" class="timeline-wrapper" aria-label="雙軌語意縮放時間軸">
+    <!-- Mobile Full-Screen Modal Header -->
+    <div class="m-tl-modal-header">
+      <span id="m-tl-modal-title" class="m-tl-modal-title">雙軌時間軸對照（前 3300–前 30）</span>
+      <button type="button" id="m-tl-close-btn" class="m-tl-close-btn" aria-label="關閉全螢幕時間軸">✕ 關閉</button>
+    </div>
+    <!-- Mobile Independent Toolbar (Period select, -, +, Full overview) -->
+    <div class="m-tl-toolbar">
+      <select id="m-tl-period-select" class="m-tl-period-select" aria-label="選擇時期跳轉">
+        <option value="">選時期跳轉…</option>
+        <option value="0">史前・原王朝（前3300起）</option>
+        <option value="1">早王朝（前3100–2686）</option>
+        <option value="2">古王國（前2686–2181）</option>
+        <option value="3">第一中間期（前2181–2055）</option>
+        <option value="4">中王國（前2055–1778）</option>
+        <option value="5">第二中間期（前1778–1550）</option>
+        <option value="6">新王國（前1550–1070）</option>
+        <option value="7">第三中間期（前1070–664）</option>
+        <option value="8">晚期王朝（前664–332）</option>
+        <option value="9">馬其頓（前332–305）</option>
+        <option value="10">托勒密（前305–30）</option>
+      </select>
+      <div class="m-tl-zoom-group" role="group" aria-label="手機時間軸縮放">
+        <button type="button" id="m-zoom-out-btn" class="m-tl-zbtn" aria-label="縮小">−</button>
+        <span id="m-zoom-readout" class="m-tl-zreadout">1.0×</span>
+        <button type="button" id="m-zoom-in-btn" class="m-tl-zbtn" aria-label="放大">＋</button>
+        <button type="button" id="m-zoom-reset-btn" class="m-tl-zbtn active" aria-label="全覽">全覽</button>
+      </div>
+    </div>
+
     <div class="timeline-floating-bar">
       <div class="zoom-controls" aria-label="時間軸縮放控制">
         <button type="button" id="zoom-out-btn" class="zoom-btn" title="縮小 (−)">−</button>
@@ -1897,9 +2923,7 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
         <div class="axis-break-badge" data-tooltip="斷軸提示：左側為史前壓縮區（約前 30 萬–3300 年，≤8% 寬），右側為前 3300–前 30 線性比例尺">//</div>
 
         <!-- Cross-track vertical golden highlight beam -->
-        <div id="cross-highlight-beam" class="cross-highlight-beam">
-          <span id="beam-axis-pill" class="beam-axis-pill"></span>
-        </div>
+        <div id="cross-highlight-beam" class="cross-highlight-beam"></div>
 
         <!-- Egypt Track -->
         <section id="egypt-zone" class="egypt-zone" aria-label="古埃及軌">
@@ -1913,12 +2937,14 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
           <div id="pharaoh-nodes-layer" class="pharaoh-nodes-layer">
             <div id="pnode-0" class="pharaoh-node is-dot-only" data-index="0" data-pct="1.0000" data-star="false" data-pre="true" data-reign="1" data-period="舊石器時代" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:1.0000%;--p-color:#6d6050"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">狩獵採集群</span></div></div><div id="pnode-1" class="pharaoh-node is-dot-only" data-index="1" data-pct="1.7000" data-star="false" data-pre="true" data-reign="1" data-period="舊石器時代晚期" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:1.7000%;--p-color:#7b6c58"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">瓦迪庫巴尼亞人群</span></div></div><div id="pnode-2" class="pharaoh-node is-dot-only" data-index="2" data-pct="2.4000" data-star="false" data-pre="true" data-reign="1" data-period="舊石器時代晚期" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:2.4000%;--p-color:#7b6c58"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">傑貝爾薩哈巴墓地人群</span></div></div><div id="pnode-3" class="pharaoh-node is-dot-only" data-index="3" data-pct="3.1000" data-star="false" data-pre="true" data-reign="1" data-period="新石器時代" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:3.1000%;--p-color:#8a775f"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">納布塔普拉亞牧人</span></div></div><div id="pnode-4" class="pharaoh-node is-dot-only" data-index="4" data-pct="3.8000" data-star="false" data-pre="true" data-reign="1" data-period="新石器時代" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:3.8000%;--p-color:#8a775f"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">法尤姆 A 文化</span></div></div><div id="pnode-5" class="pharaoh-node is-dot-only" data-index="5" data-pct="4.5000" data-star="false" data-pre="true" data-reign="1" data-period="新石器時代" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:4.5000%;--p-color:#8a775f"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">梅里姆達文化</span></div></div><div id="pnode-6" class="pharaoh-node is-dot-only" data-index="6" data-pct="5.2000" data-star="false" data-pre="true" data-reign="1" data-period="新石器時代" data-dynasty="—（無王朝）" data-china-band="prehistoric_china" data-tip-group="-1" style="left:5.2000%;--p-color:#8a775f"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">巴達里文化</span></div></div><div id="pnode-7" class="pharaoh-node is-dot-only" data-index="7" data-pct="5.9000" data-star="false" data-pre="true" data-reign="1" data-period="銅石並用時代" data-dynasty="納卡達一期" data-china-band="prehistoric_china" data-tip-group="-1" style="left:5.9000%;--p-color:#9b8364"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">納卡達文化人群</span></div></div><div id="pnode-8" class="pharaoh-node is-dot-only" data-index="8" data-pct="6.6000" data-star="false" data-pre="true" data-reign="1" data-period="銅石並用時代" data-dynasty="納卡達二期" data-china-band="prehistoric_china" data-tip-group="-1" style="left:6.6000%;--p-color:#9b8364"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">希拉孔波利斯等城邦興起</span></div></div><div id="pnode-9" class="pharaoh-node is-dot-only" data-index="9" data-pct="8.5021" data-star="false" data-pre="true" data-reign="1" data-period="史前時期（原王朝）" data-dynasty="第 0 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:8.5021%;--p-color:#ad8e68"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">蠍子王一世</span></div></div><div id="pnode-10" class="pharaoh-node is-dot-only" data-index="10" data-pct="9.9043" data-star="false" data-pre="true" data-reign="1" data-period="史前時期（原王朝）" data-dynasty="第 0 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:9.9043%;--p-color:#ad8e68"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">伊里-霍爾</span></div></div><div id="pnode-11" class="pharaoh-node is-dot-only" data-index="11" data-pct="11.3064" data-star="false" data-pre="true" data-reign="100" data-period="史前時期（原王朝）" data-dynasty="第 0 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:11.3064%;--p-color:#ad8e68"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">卡</span></div></div><div id="pnode-12" class="pharaoh-node is-dot-only" data-index="12" data-pct="12.7086" data-star="false" data-pre="true" data-reign="1" data-period="史前時期（原王朝）" data-dynasty="第 0 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:12.7086%;--p-color:#ad8e68"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">蠍子王二世</span></div></div><div id="pnode-13" class="pharaoh-node is-star" data-index="13" data-pct="13.4096" data-star="true" data-pre="false" data-reign="50" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:13.4096%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">納爾邁</span></div></div><div id="pnode-14" class="pharaoh-node is-dot-only" data-index="14" data-pct="14.8118" data-star="false" data-pre="false" data-reign="50" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:14.8118%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">荷爾-阿哈</span></div></div><div id="pnode-15" class="pharaoh-node is-dot-only" data-index="15" data-pct="15.6531" data-star="false" data-pre="false" data-reign="10" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:15.6531%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">哲爾</span></div></div><div id="pnode-16" class="pharaoh-node is-dot-only" data-index="16" data-pct="15.9335" data-star="false" data-pre="false" data-reign="10" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:15.9335%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">傑特</span></div></div><div id="pnode-17" class="pharaoh-node is-dot-only" data-index="17" data-pct="16.6346" data-star="false" data-pre="false" data-reign="40" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:16.6346%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">登</span></div></div><div id="pnode-18" class="pharaoh-node is-dot-only" data-index="18" data-pct="17.3356" data-star="false" data-pre="false" data-reign="10" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:17.3356%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿涅德吉布</span></div></div><div id="pnode-19" class="pharaoh-node is-dot-only" data-index="19" data-pct="17.6161" data-star="false" data-pre="false" data-reign="10" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:17.6161%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞邁爾凱特</span></div></div><div id="pnode-20" class="pharaoh-node is-dot-only" data-index="20" data-pct="18.1769" data-star="false" data-pre="false" data-reign="30" data-period="早王朝時期" data-dynasty="第 1 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:18.1769%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">卡阿</span></div></div><div id="pnode-21" class="pharaoh-node is-dot-only" data-index="21" data-pct="18.8780" data-star="false" data-pre="false" data-reign="20" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:18.8780%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">霍特普塞赫姆威</span></div></div><div id="pnode-22" class="pharaoh-node is-dot-only" data-index="22" data-pct="19.5791" data-star="false" data-pre="false" data-reign="30" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:19.5791%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉內布</span></div></div><div id="pnode-23" class="pharaoh-node is-dot-only" data-index="23" data-pct="20.9812" data-star="false" data-pre="false" data-reign="70" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:20.9812%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼涅特爾</span></div></div><div id="pnode-24" class="pharaoh-node is-dot-only" data-index="24" data-pct="22.1029" data-star="false" data-pre="false" data-reign="10" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:22.1029%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">溫內格</span></div></div><div id="pnode-25" class="pharaoh-node is-dot-only" data-index="25" data-pct="22.5235" data-star="false" data-pre="false" data-reign="20" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:22.5235%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞涅德</span></div></div><div id="pnode-26" class="pharaoh-node is-dot-only" data-index="26" data-pct="23.2246" data-star="false" data-pre="false" data-reign="30" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:23.2246%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">佩里布森</span></div></div><div id="pnode-27" class="pharaoh-node is-dot-only" data-index="27" data-pct="23.9818" data-star="false" data-pre="false" data-reign="24" data-period="早王朝時期" data-dynasty="第 2 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:23.9818%;--p-color:#c47d38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">哈塞赫姆威</span></div></div><div id="pnode-28" class="pharaoh-node is-star" data-index="28" data-pct="25.0754" data-star="true" data-pre="false" data-reign="22" data-period="古王國" data-dynasty="第 3 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:25.0754%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">左塞爾</span></div></div><div id="pnode-29" class="pharaoh-node is-dot-only" data-index="29" data-pct="25.4961" data-star="false" data-pre="false" data-reign="8" data-period="古王國" data-dynasty="第 3 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:25.4961%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞赫姆凱特</span></div></div><div id="pnode-30" class="pharaoh-node is-dot-only" data-index="30" data-pct="25.6784" data-star="false" data-pre="false" data-reign="5" data-period="古王國" data-dynasty="第 3 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:25.6784%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">薩那赫特</span></div></div><div id="pnode-31" class="pharaoh-node is-dot-only" data-index="31" data-pct="25.8186" data-star="false" data-pre="false" data-reign="5" data-period="古王國" data-dynasty="第 3 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:25.8186%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">哈巴</span></div></div><div id="pnode-32" class="pharaoh-node is-dot-only" data-index="32" data-pct="26.1270" data-star="false" data-pre="false" data-reign="17" data-period="古王國" data-dynasty="第 3 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:26.1270%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">胡尼</span></div></div><div id="pnode-33" class="pharaoh-node is-star" data-index="33" data-pct="26.7019" data-star="true" data-pre="false" data-reign="24" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:26.7019%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">斯尼夫魯</span></div></div><div id="pnode-34" class="pharaoh-node is-star" data-index="34" data-pct="27.3609" data-star="true" data-pre="false" data-reign="23" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:27.3609%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">胡夫</span></div></div><div id="pnode-35" class="pharaoh-node is-dot-only" data-index="35" data-pct="27.7956" data-star="false" data-pre="false" data-reign="8" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:27.7956%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">雷吉德夫</span></div></div><div id="pnode-36" class="pharaoh-node is-star" data-index="36" data-pct="28.2723" data-star="true" data-pre="false" data-reign="26" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:28.2723%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">哈夫拉</span></div></div><div id="pnode-37" class="pharaoh-node is-dot-only" data-index="37" data-pct="28.6649" data-star="false" data-pre="false" data-reign="2" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:28.6649%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">比凱里斯</span></div></div><div id="pnode-38" class="pharaoh-node is-dot-only" data-index="38" data-pct="29.0715" data-star="false" data-pre="false" data-reign="27" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:29.0715%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">孟卡拉</span></div></div><div id="pnode-39" class="pharaoh-node is-dot-only" data-index="39" data-pct="29.5202" data-star="false" data-pre="false" data-reign="5" data-period="古王國" data-dynasty="第 4 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:29.5202%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">謝普塞斯卡弗</span></div></div><div id="pnode-40" class="pharaoh-node is-dot-only" data-index="40" data-pct="29.8007" data-star="false" data-pre="false" data-reign="7" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:29.8007%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">烏塞爾卡弗</span></div></div><div id="pnode-41" class="pharaoh-node is-dot-only" data-index="41" data-pct="30.0671" data-star="false" data-pre="false" data-reign="12" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:30.0671%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">薩胡拉</span></div></div><div id="pnode-42" class="pharaoh-node is-dot-only" data-index="42" data-pct="30.5157" data-star="false" data-pre="false" data-reign="20" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:30.5157%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內弗爾卡拉</span></div></div><div id="pnode-43" class="pharaoh-node is-dot-only" data-index="43" data-pct="30.8943" data-star="false" data-pre="false" data-reign="7" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:30.8943%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">謝普塞斯卡拉</span></div></div><div id="pnode-44" class="pharaoh-node is-dot-only" data-index="44" data-pct="31.0345" data-star="false" data-pre="false" data-reign="3" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:31.0345%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內弗爾弗拉</span></div></div><div id="pnode-45" class="pharaoh-node is-dot-only" data-index="45" data-pct="31.4131" data-star="false" data-pre="false" data-reign="24" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:31.4131%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼烏塞拉</span></div></div><div id="pnode-46" class="pharaoh-node is-dot-only" data-index="46" data-pct="31.8478" data-star="false" data-pre="false" data-reign="7" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:31.8478%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">門卡霍爾</span></div></div><div id="pnode-47" class="pharaoh-node is-dot-only" data-index="47" data-pct="32.4928" data-star="false" data-pre="false" data-reign="39" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:32.4928%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">傑德卡拉</span></div></div><div id="pnode-48" class="pharaoh-node is-dot-only" data-index="48" data-pct="33.4602" data-star="false" data-pre="false" data-reign="30" data-period="古王國" data-dynasty="第 5 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:33.4602%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">烏納斯</span></div></div><div id="pnode-49" class="pharaoh-node is-dot-only" data-index="49" data-pct="34.0491" data-star="false" data-pre="false" data-reign="12" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:34.0491%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">特提</span></div></div><div id="pnode-50" class="pharaoh-node is-dot-only" data-index="50" data-pct="34.2314" data-star="false" data-pre="false" data-reign="1" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:34.2314%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">烏塞爾卡拉</span></div></div><div id="pnode-51" class="pharaoh-node is-dot-only" data-index="51" data-pct="34.9325" data-star="false" data-pre="false" data-reign="49" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:34.9325%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">佩皮一世</span></div></div><div id="pnode-52" class="pharaoh-node is-dot-only" data-index="52" data-pct="35.6896" data-star="false" data-pre="false" data-reign="5" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:35.6896%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">梅倫拉</span></div></div><div id="pnode-53" class="pharaoh-node is-dot-only" data-index="53" data-pct="37.0778" data-star="false" data-pre="false" data-reign="94" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:37.0778%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">佩皮二世</span></div></div><div id="pnode-54" class="pharaoh-node is-dot-only" data-index="54" data-pct="38.4098" data-star="false" data-pre="false" data-reign="1" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:38.4098%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">梅倫拉二世</span></div></div><div id="pnode-55" class="pharaoh-node is-dot-only" data-index="55" data-pct="38.4519" data-star="false" data-pre="false" data-reign="2" data-period="古王國" data-dynasty="第 6 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:38.4519%;--p-color:#d69a2c"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼托克里斯</span></div></div><div id="pnode-56" class="pharaoh-node is-dot-only" data-index="56" data-pct="38.7744" data-star="false" data-pre="false" data-reign="21" data-period="第一中間期" data-dynasty="第 7–8 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:38.7744%;--p-color:#7a8494"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">第 7–8 王朝短命諸王（名單殘缺）</span></div></div><div id="pnode-57" class="pharaoh-node is-dot-only" data-index="57" data-pct="40.5411" data-star="false" data-pre="false" data-reign="105" data-period="第一中間期" data-dynasty="第 9–10 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:40.5411%;--p-color:#7a8494"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">凱提一世至三世等北方王系</span></div></div><div id="pnode-58" class="pharaoh-node is-dot-only" data-index="58" data-pct="40.2326" data-star="false" data-pre="false" data-reign="13" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:40.2326%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">因提夫一世</span></div></div><div id="pnode-59" class="pharaoh-node is-dot-only" data-index="59" data-pct="41.1019" data-star="false" data-pre="false" data-reign="49" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:41.1019%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">因提夫二世</span></div></div><div id="pnode-60" class="pharaoh-node is-dot-only" data-index="60" data-pct="41.9011" data-star="false" data-pre="false" data-reign="8" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="xia" data-tip-group="-1" style="left:41.9011%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">因提夫三世</span></div></div><div id="pnode-61" class="pharaoh-node is-star" data-index="61" data-pct="42.7284" data-star="true" data-pre="false" data-reign="51" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="xia" data-tip-group="-1" style="left:42.7284%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">孟圖霍特普二世</span></div></div><div id="pnode-62" class="pharaoh-node is-dot-only" data-index="62" data-pct="43.6117" data-star="false" data-pre="false" data-reign="12" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="xia" data-tip-group="-1" style="left:43.6117%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">孟圖霍特普三世</span></div></div><div id="pnode-63" class="pharaoh-node is-dot-only" data-index="63" data-pct="43.8781" data-star="false" data-pre="false" data-reign="7" data-period="中王國" data-dynasty="第 11 王朝" data-china-band="xia" data-tip-group="-1" style="left:43.8781%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">孟圖霍特普四世</span></div></div><div id="pnode-64" class="pharaoh-node is-dot-only" data-index="64" data-pct="44.3829" data-star="false" data-pre="false" data-reign="29" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:44.3829%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆赫特一世</span></div></div><div id="pnode-65" class="pharaoh-node is-dot-only" data-index="65" data-pct="45.2663" data-star="false" data-pre="false" data-reign="44" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:45.2663%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞索斯特里斯一世</span></div></div><div id="pnode-66" class="pharaoh-node is-dot-only" data-index="66" data-pct="46.3740" data-star="false" data-pre="false" data-reign="35" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:46.3740%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆赫特二世</span></div></div><div id="pnode-67" class="pharaoh-node is-dot-only" data-index="67" data-pct="46.9208" data-star="false" data-pre="false" data-reign="4" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:46.9208%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞索斯特里斯二世</span></div></div><div id="pnode-68" class="pharaoh-node is-star" data-index="68" data-pct="47.5237" data-star="true" data-pre="false" data-reign="39" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:47.5237%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">塞索斯特里斯三世</span></div></div><div id="pnode-69" class="pharaoh-node is-dot-only" data-index="69" data-pct="48.7436" data-star="false" data-pre="false" data-reign="48" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:48.7436%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆赫特三世</span></div></div><div id="pnode-70" class="pharaoh-node is-dot-only" data-index="70" data-pct="49.5428" data-star="false" data-pre="false" data-reign="9" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:49.5428%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆赫特四世</span></div></div><div id="pnode-71" class="pharaoh-node is-star" data-index="71" data-pct="49.7251" data-star="true" data-pre="false" data-reign="4" data-period="中王國" data-dynasty="第 12 王朝" data-china-band="xia" data-tip-group="-1" style="left:49.7251%;--p-color:#2f9b79"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">索貝克內弗魯</span></div></div><div id="pnode-72" class="pharaoh-node is-dot-only" data-index="72" data-pct="51.6460" data-star="false" data-pre="false" data-reign="123" data-period="第二中間期" data-dynasty="第 13 王朝" data-china-band="xia" data-tip-group="-1" style="left:51.6460%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">韋加夫、索貝克霍特普諸王、內弗爾霍特普一世、阿伊等數十位短命王</span></div></div><div id="pnode-73" class="pharaoh-node is-dot-only" data-index="73" data-pct="51.9685" data-star="false" data-pre="false" data-reign="100" data-period="第二中間期" data-dynasty="第 14 王朝" data-china-band="xia" data-tip-group="-1" style="left:51.9685%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼赫西等三角洲東部地方王系</span></div></div><div id="pnode-74" class="pharaoh-node is-dot-only" data-index="74" data-pct="53.7913" data-star="false" data-pre="false" data-reign="30" data-period="第二中間期" data-dynasty="第 15 王朝" data-china-band="xia" data-tip-group="-1" style="left:53.7913%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">薩利提斯</span></div></div><div id="pnode-75" class="pharaoh-node is-dot-only" data-index="75" data-pct="54.7728" data-star="false" data-pre="false" data-reign="40" data-period="第二中間期" data-dynasty="第 15 王朝" data-china-band="xia" data-tip-group="-1" style="left:54.7728%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">希安</span></div></div><div id="pnode-76" class="pharaoh-node is-dot-only" data-index="76" data-pct="55.8244" data-star="false" data-pre="false" data-reign="35" data-period="第二中間期" data-dynasty="第 15 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:55.8244%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿波菲斯</span></div></div><div id="pnode-77" class="pharaoh-node is-dot-only" data-index="77" data-pct="56.1749" data-star="false" data-pre="false" data-reign="1" data-period="第二中間期" data-dynasty="第 15 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:56.1749%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">卡穆迪</span></div></div><div id="pnode-78" class="pharaoh-node is-dot-only" data-index="78" data-pct="54.7728" data-star="false" data-pre="false" data-reign="100" data-period="第二中間期" data-dynasty="第 16–17 王朝" data-china-band="xia" data-tip-group="-1" style="left:54.7728%;--p-color:#8c7399"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">第 16 王朝屬國小王；第 17 王朝底比斯王系（因提夫諸王、塞格嫩拉·陶、卡摩斯）</span></div></div><div id="pnode-79" class="pharaoh-node is-star" data-index="79" data-pct="56.5255" data-star="true" data-pre="false" data-reign="25" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:56.5255%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">阿赫摩斯一世</span></div></div><div id="pnode-80" class="pharaoh-node is-dot-only" data-index="80" data-pct="57.1704" data-star="false" data-pre="false" data-reign="21" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:57.1704%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙霍特普一世</span></div></div><div id="pnode-81" class="pharaoh-node is-dot-only" data-index="81" data-pct="57.6331" data-star="false" data-pre="false" data-reign="12" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:57.6331%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">圖特摩斯一世</span></div></div><div id="pnode-82" class="pharaoh-node is-dot-only" data-index="82" data-pct="57.9837" data-star="false" data-pre="false" data-reign="13" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:57.9837%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">圖特摩斯二世</span></div></div><div id="pnode-83" class="pharaoh-node is-star" data-index="83" data-pct="58.4604" data-star="true" data-pre="false" data-reign="21" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:58.4604%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">哈特謝普蘇特</span></div></div><div id="pnode-84" class="pharaoh-node is-star" data-index="84" data-pct="58.9231" data-star="true" data-pre="false" data-reign="54" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:58.9231%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">圖特摩斯三世</span></div></div><div id="pnode-85" class="pharaoh-node is-dot-only" data-index="85" data-pct="60.0308" data-star="false" data-pre="false" data-reign="25" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:60.0308%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙霍特普二世</span></div></div><div id="pnode-86" class="pharaoh-node is-dot-only" data-index="86" data-pct="60.5216" data-star="false" data-pre="false" data-reign="10" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:60.5216%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">圖特摩斯四世</span></div></div><div id="pnode-87" class="pharaoh-node is-star" data-index="87" data-pct="61.1946" data-star="true" data-pre="false" data-reign="38" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:61.1946%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">阿蒙霍特普三世</span></div></div><div id="pnode-88" class="pharaoh-node is-star" data-index="88" data-pct="61.9517" data-star="true" data-pre="false" data-reign="16" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:61.9517%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">阿肯那頓</span></div></div><div id="pnode-89" class="pharaoh-node is-dot-only" data-index="89" data-pct="62.2041" data-star="false" data-pre="false" data-reign="2" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:62.2041%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">斯門卡拉</span></div></div><div id="pnode-90" class="pharaoh-node is-dot-only" data-index="90" data-pct="62.2602" data-star="false" data-pre="false" data-reign="2" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:62.2602%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內弗爾內弗魯阿頓</span></div></div><div id="pnode-91" class="pharaoh-node is-star" data-index="91" data-pct="62.4144" data-star="true" data-pre="false" data-reign="9" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:62.4144%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">圖坦卡門</span></div></div><div id="pnode-92" class="pharaoh-node is-dot-only" data-index="92" data-pct="62.5967" data-star="false" data-pre="false" data-reign="4" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:62.5967%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿伊</span></div></div><div id="pnode-93" class="pharaoh-node is-dot-only" data-index="93" data-pct="63.0314" data-star="false" data-pre="false" data-reign="27" data-period="新王國" data-dynasty="第 18 王朝" data-china-band="shang_early" data-tip-group="-1" style="left:63.0314%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">荷雷姆赫布</span></div></div><div id="pnode-94" class="pharaoh-node is-dot-only" data-index="94" data-pct="63.4380" data-star="false" data-pre="false" data-reign="2" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:63.4380%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯一世</span></div></div><div id="pnode-95" class="pharaoh-node is-dot-only" data-index="95" data-pct="63.6203" data-star="false" data-pre="false" data-reign="11" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:63.6203%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞提一世</span></div></div><div id="pnode-96" class="pharaoh-node is-star" data-index="96" data-pct="64.6999" data-star="true" data-pre="false" data-reign="66" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:64.6999%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">拉美西斯二世</span></div></div><div id="pnode-97" class="pharaoh-node is-dot-only" data-index="97" data-pct="65.7656" data-star="false" data-pre="false" data-reign="10" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:65.7656%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">梅爾內普塔</span></div></div><div id="pnode-98" class="pharaoh-node is-dot-only" data-index="98" data-pct="65.9619" data-star="false" data-pre="false" data-reign="4" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:65.9619%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙麥西斯</span></div></div><div id="pnode-99" class="pharaoh-node is-dot-only" data-index="99" data-pct="66.0740" data-star="false" data-pre="false" data-reign="6" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:66.0740%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞提二世</span></div></div><div id="pnode-100" class="pharaoh-node is-dot-only" data-index="100" data-pct="66.2423" data-star="false" data-pre="false" data-reign="6" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:66.2423%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">西普塔</span></div></div><div id="pnode-101" class="pharaoh-node is-dot-only" data-index="101" data-pct="66.3545" data-star="false" data-pre="false" data-reign="2" data-period="新王國" data-dynasty="第 19 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:66.3545%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">陶斯雷特</span></div></div><div id="pnode-102" class="pharaoh-node is-dot-only" data-index="102" data-pct="66.3404" data-star="false" data-pre="false" data-reign="3" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:66.3404%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塞特納赫特</span></div></div><div id="pnode-103" class="pharaoh-node is-star" data-index="103" data-pct="66.8172" data-star="true" data-pre="false" data-reign="31" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:66.8172%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">拉美西斯三世</span></div></div><div id="pnode-104" class="pharaoh-node is-dot-only" data-index="104" data-pct="67.3360" data-star="false" data-pre="false" data-reign="6" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:67.3360%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯四世</span></div></div><div id="pnode-105" class="pharaoh-node is-dot-only" data-index="105" data-pct="67.4762" data-star="false" data-pre="false" data-reign="4" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:67.4762%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯五世</span></div></div><div id="pnode-106" class="pharaoh-node is-dot-only" data-index="106" data-pct="67.6444" data-star="false" data-pre="false" data-reign="8" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:67.6444%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯六世</span></div></div><div id="pnode-107" class="pharaoh-node is-dot-only" data-index="107" data-pct="67.8548" data-star="false" data-pre="false" data-reign="7" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:67.8548%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯七世</span></div></div><div id="pnode-108" class="pharaoh-node is-dot-only" data-index="108" data-pct="67.9669" data-star="false" data-pre="false" data-reign="1" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:67.9669%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯八世</span></div></div><div id="pnode-109" class="pharaoh-node is-dot-only" data-index="109" data-pct="68.2333" data-star="false" data-pre="false" data-reign="18" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:68.2333%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯九世</span></div></div><div id="pnode-110" class="pharaoh-node is-dot-only" data-index="110" data-pct="68.5418" data-star="false" data-pre="false" data-reign="4" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:68.5418%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯十世</span></div></div><div id="pnode-111" class="pharaoh-node is-dot-only" data-index="111" data-pct="69.1167" data-star="false" data-pre="false" data-reign="37" data-period="新王國" data-dynasty="第 20 王朝" data-china-band="shang_late" data-tip-group="-1" style="left:69.1167%;--p-color:#d95b38"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">拉美西斯十一世</span></div></div><div id="pnode-112" class="pharaoh-node is-dot-only" data-index="112" data-pct="70.0000" data-star="false" data-pre="false" data-reign="26" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="shang_late" data-tip-group="0" style="left:70.0000%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">斯門德斯</span></div></div><div id="pnode-113" class="pharaoh-node is-dot-only" data-index="113" data-pct="70.4207" data-star="false" data-pre="false" data-reign="4" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:70.4207%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆尼蘇</span></div></div><div id="pnode-114" class="pharaoh-node is-dot-only" data-index="114" data-pct="71.1358" data-star="false" data-pre="false" data-reign="47" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:71.1358%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">普蘇森尼斯一世</span></div></div><div id="pnode-115" class="pharaoh-node is-dot-only" data-index="115" data-pct="71.9210" data-star="false" data-pre="false" data-reign="9" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:71.9210%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿蒙涅姆普特</span></div></div><div id="pnode-116" class="pharaoh-node is-dot-only" data-index="116" data-pct="72.1313" data-star="false" data-pre="false" data-reign="6" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:72.1313%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">老奧索爾孔（奧索霍爾）</span></div></div><div id="pnode-117" class="pharaoh-node is-dot-only" data-index="117" data-pct="72.4818" data-star="false" data-pre="false" data-reign="19" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:72.4818%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">西阿蒙</span></div></div><div id="pnode-118" class="pharaoh-node is-dot-only" data-index="118" data-pct="72.9445" data-star="false" data-pre="false" data-reign="14" data-period="第三中間期" data-dynasty="第 21 王朝" data-china-band="west_zhou" data-tip-group="0" style="left:72.9445%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">普蘇森尼斯二世</span></div></div><div id="pnode-119" class="pharaoh-node is-dot-only" data-index="119" data-pct="73.4633" data-star="false" data-pre="false" data-reign="23" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:73.4633%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">舍順克一世</span></div></div><div id="pnode-120" class="pharaoh-node is-dot-only" data-index="120" data-pct="74.2766" data-star="false" data-pre="false" data-reign="35" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:74.2766%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">奧索爾孔一世</span></div></div><div id="pnode-121" class="pharaoh-node is-dot-only" data-index="121" data-pct="74.9496" data-star="false" data-pre="false" data-reign="13" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:74.9496%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塔克洛特一世</span></div></div><div id="pnode-122" class="pharaoh-node is-dot-only" data-index="122" data-pct="75.4684" data-star="false" data-pre="false" data-reign="24" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:75.4684%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">奧索爾孔二世</span></div></div><div id="pnode-123" class="pharaoh-node is-dot-only" data-index="123" data-pct="76.7163" data-star="false" data-pre="false" data-reign="39" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:76.7163%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">舍順克三世</span></div></div><div id="pnode-124" class="pharaoh-node is-dot-only" data-index="124" data-pct="77.4454" data-star="false" data-pre="false" data-reign="13" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:77.4454%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">舍順克四世</span></div></div><div id="pnode-125" class="pharaoh-node is-dot-only" data-index="125" data-pct="77.7258" data-star="false" data-pre="false" data-reign="7" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="west_zhou" data-tip-group="1" style="left:77.7258%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">帕米</span></div></div><div id="pnode-126" class="pharaoh-node is-dot-only" data-index="126" data-pct="78.6512" data-star="false" data-pre="false" data-reign="37" data-period="第三中間期" data-dynasty="第 22 王朝" data-china-band="spring_autumn" data-tip-group="1" style="left:78.6512%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">舍順克五世</span></div></div><div id="pnode-127" class="pharaoh-node is-dot-only" data-index="127" data-pct="76.5060" data-star="false" data-pre="false" data-reign="24" data-period="第三中間期" data-dynasty="第 23 王朝" data-china-band="west_zhou" data-tip-group="2" style="left:76.5060%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">帕杜巴斯特一世</span></div></div><div id="pnode-128" class="pharaoh-node is-dot-only" data-index="128" data-pct="77.1229" data-star="false" data-pre="false" data-reign="20" data-period="第三中間期" data-dynasty="第 23 王朝" data-china-band="west_zhou" data-tip-group="2" style="left:77.1229%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">舍順克六世（舊稱舍順克四世）</span></div></div><div id="pnode-129" class="pharaoh-node is-dot-only" data-index="129" data-pct="77.8100" data-star="false" data-pre="false" data-reign="29" data-period="第三中間期" data-dynasty="第 23 王朝" data-china-band="west_zhou" data-tip-group="2" style="left:77.8100%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">奧索爾孔三世</span></div></div><div id="pnode-130" class="pharaoh-node is-dot-only" data-index="130" data-pct="78.3147" data-star="false" data-pre="false" data-reign="7" data-period="第三中間期" data-dynasty="第 23 王朝" data-china-band="spring_autumn" data-tip-group="2" style="left:78.3147%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">塔克洛特三世等</span></div></div><div id="pnode-131" class="pharaoh-node is-dot-only" data-index="131" data-pct="79.3523" data-star="false" data-pre="false" data-reign="7" data-period="第三中間期" data-dynasty="第 24 王朝" data-china-band="spring_autumn" data-tip-group="3" style="left:79.3523%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">特夫納赫特</span></div></div><div id="pnode-132" class="pharaoh-node is-dot-only" data-index="132" data-pct="79.5206" data-star="false" data-pre="false" data-reign="5" data-period="第三中間期" data-dynasty="第 24 王朝" data-china-band="spring_autumn" data-tip-group="3" style="left:79.5206%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">博克霍里斯</span></div></div><div id="pnode-133" class="pharaoh-node is-dot-only" data-index="133" data-pct="78.4690" data-star="false" data-pre="false" data-reign="10" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:78.4690%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿拉拉</span></div></div><div id="pnode-134" class="pharaoh-node is-dot-only" data-index="134" data-pct="78.6933" data-star="false" data-pre="false" data-reign="6" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:78.6933%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">卡什塔</span></div></div><div id="pnode-135" class="pharaoh-node is-dot-only" data-index="135" data-pct="79.1981" data-star="false" data-pre="false" data-reign="30" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:79.1981%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">皮耶</span></div></div><div id="pnode-136" class="pharaoh-node is-dot-only" data-index="136" data-pct="79.7449" data-star="false" data-pre="false" data-reign="9" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:79.7449%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">沙巴卡</span></div></div><div id="pnode-137" class="pharaoh-node is-dot-only" data-index="137" data-pct="80.0814" data-star="false" data-pre="false" data-reign="15" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:80.0814%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">謝比特庫</span></div></div><div id="pnode-138" class="pharaoh-node is-star" data-index="138" data-pct="80.6563" data-star="true" data-pre="false" data-reign="26" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:80.6563%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">塔哈爾卡</span></div></div><div id="pnode-139" class="pharaoh-node is-dot-only" data-index="139" data-pct="81.1330" data-star="false" data-pre="false" data-reign="8" data-period="第三中間期" data-dynasty="第 25 王朝" data-china-band="spring_autumn" data-tip-group="4" style="left:81.1330%;--p-color:#4682b4"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">坦塔馬尼</span></div></div><div id="pnode-140" class="pharaoh-node is-dot-only" data-index="140" data-pct="80.9087" data-star="false" data-pre="false" data-reign="8" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:80.9087%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼科一世</span></div></div><div id="pnode-141" class="pharaoh-node is-star" data-index="141" data-pct="81.7780" data-star="true" data-pre="false" data-reign="54" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:81.7780%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">普薩美提克一世</span></div></div><div id="pnode-142" class="pharaoh-node is-dot-only" data-index="142" data-pct="82.7455" data-star="false" data-pre="false" data-reign="15" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:82.7455%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">尼科二世</span></div></div><div id="pnode-143" class="pharaoh-node is-dot-only" data-index="143" data-pct="83.0399" data-star="false" data-pre="false" data-reign="6" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:83.0399%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">普薩美提克二世</span></div></div><div id="pnode-144" class="pharaoh-node is-dot-only" data-index="144" data-pct="83.3905" data-star="false" data-pre="false" data-reign="19" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:83.3905%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿普里斯</span></div></div><div id="pnode-145" class="pharaoh-node is-dot-only" data-index="145" data-pct="84.2738" data-star="false" data-pre="false" data-reign="44" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:84.2738%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿瑪西斯</span></div></div><div id="pnode-146" class="pharaoh-node is-dot-only" data-index="146" data-pct="84.9048" data-star="false" data-pre="false" data-reign="1" data-period="晚期王朝" data-dynasty="第 26 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:84.9048%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">普薩美提克三世</span></div></div><div id="pnode-147" class="pharaoh-node is-dot-only" data-index="147" data-pct="84.9609" data-star="false" data-pre="false" data-reign="3" data-period="晚期王朝" data-dynasty="第 27 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:84.9609%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">岡比西斯二世</span></div></div><div id="pnode-148" class="pharaoh-node is-dot-only" data-index="148" data-pct="85.5077" data-star="false" data-pre="false" data-reign="36" data-period="晚期王朝" data-dynasty="第 27 王朝" data-china-band="spring_autumn" data-tip-group="-1" style="left:85.5077%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">大流士一世</span></div></div><div id="pnode-149" class="pharaoh-node is-dot-only" data-index="149" data-pct="86.3069" data-star="false" data-pre="false" data-reign="21" data-period="晚期王朝" data-dynasty="第 27 王朝" data-china-band="neolithic" data-tip-group="-1" style="left:86.3069%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">薛西斯一世</span></div></div><div id="pnode-150" class="pharaoh-node is-dot-only" data-index="150" data-pct="87.1763" data-star="false" data-pre="false" data-reign="41" data-period="晚期王朝" data-dynasty="第 27 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:87.1763%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿爾塔薛西斯一世</span></div></div><div id="pnode-151" class="pharaoh-node is-dot-only" data-index="151" data-pct="88.0316" data-star="false" data-pre="false" data-reign="20" data-period="晚期王朝" data-dynasty="第 27 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.0316%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">大流士二世</span></div></div><div id="pnode-152" class="pharaoh-node is-dot-only" data-index="152" data-pct="88.3821" data-star="false" data-pre="false" data-reign="5" data-period="晚期王朝" data-dynasty="第 28 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.3821%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿米爾塔尼烏斯</span></div></div><div id="pnode-153" class="pharaoh-node is-dot-only" data-index="153" data-pct="88.5363" data-star="false" data-pre="false" data-reign="6" data-period="晚期王朝" data-dynasty="第 29 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.5363%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內法里提斯一世</span></div></div><div id="pnode-154" class="pharaoh-node is-dot-only" data-index="154" data-pct="88.8027" data-star="false" data-pre="false" data-reign="13" data-period="晚期王朝" data-dynasty="第 29 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.8027%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">哈科爾</span></div></div><div id="pnode-155" class="pharaoh-node is-dot-only" data-index="155" data-pct="88.6345" data-star="false" data-pre="false" data-reign="1" data-period="晚期王朝" data-dynasty="第 29 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.6345%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">普薩穆提斯</span></div></div><div id="pnode-156" class="pharaoh-node is-dot-only" data-index="156" data-pct="88.9850" data-star="false" data-pre="false" data-reign="1" data-period="晚期王朝" data-dynasty="第 29 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:88.9850%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內法里提斯二世</span></div></div><div id="pnode-157" class="pharaoh-node is-dot-only" data-index="157" data-pct="89.2374" data-star="false" data-pre="false" data-reign="18" data-period="晚期王朝" data-dynasty="第 30 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:89.2374%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">內克塔內布一世</span></div></div><div id="pnode-158" class="pharaoh-node is-dot-only" data-index="158" data-pct="89.5178" data-star="false" data-pre="false" data-reign="2" data-period="晚期王朝" data-dynasty="第 30 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:89.5178%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">提奧斯</span></div></div><div id="pnode-159" class="pharaoh-node is-star" data-index="159" data-pct="89.7842" data-star="true" data-pre="false" data-reign="17" data-period="晚期王朝" data-dynasty="第 30 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:89.7842%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">內克塔內布二世</span></div></div><div id="pnode-160" class="pharaoh-node is-dot-only" data-index="160" data-pct="90.0927" data-star="false" data-pre="false" data-reign="5" data-period="晚期王朝" data-dynasty="第 31 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:90.0927%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿爾塔薛西斯三世</span></div></div><div id="pnode-161" class="pharaoh-node is-dot-only" data-index="161" data-pct="90.1909" data-star="false" data-pre="false" data-reign="2" data-period="晚期王朝" data-dynasty="第 31 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:90.1909%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">阿爾塞斯</span></div></div><div id="pnode-162" class="pharaoh-node is-dot-only" data-index="162" data-pct="90.2750" data-star="false" data-pre="false" data-reign="4" data-period="晚期王朝" data-dynasty="第 31 王朝" data-china-band="warring_states" data-tip-group="-1" style="left:90.2750%;--p-color:#7a68ae"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">大流士三世</span></div></div><div id="pnode-163" class="pharaoh-node is-dot-only" data-index="163" data-pct="90.4573" data-star="false" data-pre="false" data-reign="9" data-period="馬其頓統治" data-dynasty="馬其頓" data-china-band="warring_states" data-tip-group="-1" style="left:90.4573%;--p-color:#3898a8"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">亞歷山大三世</span></div></div><div id="pnode-164" class="pharaoh-node is-dot-only" data-index="164" data-pct="90.6676" data-star="false" data-pre="false" data-reign="6" data-period="馬其頓統治" data-dynasty="馬其頓" data-china-band="warring_states" data-tip-group="-1" style="left:90.6676%;--p-color:#3898a8"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">腓力三世</span></div></div><div id="pnode-165" class="pharaoh-node is-dot-only" data-index="165" data-pct="90.8499" data-star="false" data-pre="false" data-reign="7" data-period="馬其頓統治" data-dynasty="馬其頓" data-china-band="warring_states" data-tip-group="-1" style="left:90.8499%;--p-color:#3898a8"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">亞歷山大四世</span></div></div><div id="pnode-166" class="pharaoh-node is-star" data-index="166" data-pct="91.4107" data-star="true" data-pre="false" data-reign="23" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="warring_states" data-tip-group="-1" style="left:91.4107%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">托勒密一世 索特爾</span></div></div><div id="pnode-167" class="pharaoh-node is-dot-only" data-index="167" data-pct="92.1959" data-star="false" data-pre="false" data-reign="39" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="warring_states" data-tip-group="-1" style="left:92.1959%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密二世 菲拉德爾福斯</span></div></div><div id="pnode-168" class="pharaoh-node is-dot-only" data-index="168" data-pct="93.0793" data-star="false" data-pre="false" data-reign="24" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="warring_states" data-tip-group="-1" style="left:93.0793%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密三世 歐厄爾葛特斯</span></div></div><div id="pnode-169" class="pharaoh-node is-dot-only" data-index="169" data-pct="93.6682" data-star="false" data-pre="false" data-reign="18" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="qin" data-tip-group="-1" style="left:93.6682%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密四世 菲洛帕托爾</span></div></div><div id="pnode-170" class="pharaoh-node is-dot-only" data-index="170" data-pct="94.2571" data-star="false" data-pre="false" data-reign="24" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:94.2571%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密五世 埃皮法尼斯</span></div></div><div id="pnode-171" class="pharaoh-node is-dot-only" data-index="171" data-pct="95.0843" data-star="false" data-pre="false" data-reign="35" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:95.0843%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密六世 菲洛墨托爾</span></div></div><div id="pnode-172" class="pharaoh-node is-dot-only" data-index="172" data-pct="95.6312" data-star="false" data-pre="false" data-reign="54" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:95.6312%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密八世 歐厄爾葛特斯二世</span></div></div><div id="pnode-173" class="pharaoh-node is-dot-only" data-index="173" data-pct="96.8931" data-star="false" data-pre="false" data-reign="36" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:96.8931%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密九世 索特爾二世</span></div></div><div id="pnode-174" class="pharaoh-node is-dot-only" data-index="174" data-pct="96.8650" data-star="false" data-pre="false" data-reign="22" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:96.8650%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密十世 亞歷山大一世</span></div></div><div id="pnode-175" class="pharaoh-node is-dot-only" data-index="175" data-pct="97.3979" data-star="false" data-pre="false" data-reign="1" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:97.3979%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密十一世 亞歷山大二世</span></div></div><div id="pnode-176" class="pharaoh-node is-dot-only" data-index="176" data-pct="97.8045" data-star="false" data-pre="false" data-reign="29" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:97.8045%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-mini-dot></span><span class="p-name">托勒密十二世 奧勒特斯</span></div></div><div id="pnode-177" class="pharaoh-node is-star" data-index="177" data-pct="98.5056" data-star="true" data-pre="false" data-reign="21" data-period="托勒密王朝" data-dynasty="托勒密王朝" data-china-band="west_han" data-tip-group="-1" style="left:98.5056%;--p-color:#c24e78"><div class="p-stem"></div><div class="p-axis-dot"></div><div class="p-dot-marker"></div><div class="p-label"><span class=p-star-icon>★</span><span class="p-name">克麗奧佩脫拉七世</span></div></div>
           </div>
+          <div id="m-clusters-layer" class="pharaoh-nodes-layer"></div>
         </section>
 
         <!-- Shared Year Axis -->
         <div id="shared-axis-zone" class="shared-axis-zone" aria-label="共用年代軸">
           <span class="axis-side-label">共用年代軸</span>
           <div class="axis-tick step-500 step-200 step-100 step-50" data-yr="3300" style="left:7.1000%"><span class="tick-top"></span><span class="tick-text">前 3300</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="3250" style="left:8.5021%"><span class="tick-top"></span><span class="tick-text">前 3250</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="3200" style="left:9.9043%"><span class="tick-top"></span><span class="tick-text">前 3200</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="3150" style="left:11.3064%"><span class="tick-top"></span><span class="tick-text">前 3150</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="3100" style="left:12.7086%"><span class="tick-top"></span><span class="tick-text">前 3100</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="3050" style="left:14.1107%"><span class="tick-top"></span><span class="tick-text">前 3050</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-200 step-100 step-50" data-yr="3000" style="left:15.5128%"><span class="tick-top"></span><span class="tick-text">前 3000</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2950" style="left:16.9150%"><span class="tick-top"></span><span class="tick-text">前 2950</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="2900" style="left:18.3171%"><span class="tick-top"></span><span class="tick-text">前 2900</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2850" style="left:19.7193%"><span class="tick-top"></span><span class="tick-text">前 2850</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="2800" style="left:21.1214%"><span class="tick-top"></span><span class="tick-text">前 2800</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2750" style="left:22.5235%"><span class="tick-top"></span><span class="tick-text">前 2750</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="2700" style="left:23.9257%"><span class="tick-top"></span><span class="tick-text">前 2700</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2650" style="left:25.3278%"><span class="tick-top"></span><span class="tick-text">前 2650</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="2600" style="left:26.7300%"><span class="tick-top"></span><span class="tick-text">前 2600</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2550" style="left:28.1321%"><span class="tick-top"></span><span class="tick-text">前 2550</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-100 step-50" data-yr="2500" style="left:29.5343%"><span class="tick-top"></span><span class="tick-text">前 2500</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2450" style="left:30.9364%"><span class="tick-top"></span><span class="tick-text">前 2450</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="2400" style="left:32.3385%"><span class="tick-top"></span><span class="tick-text">前 2400</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2350" style="left:33.7407%"><span class="tick-top"></span><span class="tick-text">前 2350</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="2300" style="left:35.1428%"><span class="tick-top"></span><span class="tick-text">前 2300</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2250" style="left:36.5450%"><span class="tick-top"></span><span class="tick-text">前 2250</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="2200" style="left:37.9471%"><span class="tick-top"></span><span class="tick-text">前 2200</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2150" style="left:39.3492%"><span class="tick-top"></span><span class="tick-text">前 2150</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="2100" style="left:40.7514%"><span class="tick-top"></span><span class="tick-text">前 2100</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="2050" style="left:42.1535%"><span class="tick-top"></span><span class="tick-text">前 2050</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-200 step-100 step-50" data-yr="2000" style="left:43.5557%"><span class="tick-top"></span><span class="tick-text">前 2000</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1950" style="left:44.9578%"><span class="tick-top"></span><span class="tick-text">前 1950</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="1900" style="left:46.3599%"><span class="tick-top"></span><span class="tick-text">前 1900</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1850" style="left:47.7621%"><span class="tick-top"></span><span class="tick-text">前 1850</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="1800" style="left:49.1642%"><span class="tick-top"></span><span class="tick-text">前 1800</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1750" style="left:50.5664%"><span class="tick-top"></span><span class="tick-text">前 1750</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="1700" style="left:51.9685%"><span class="tick-top"></span><span class="tick-text">前 1700</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1650" style="left:53.3706%"><span class="tick-top"></span><span class="tick-text">前 1650</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="1600" style="left:54.7728%"><span class="tick-top"></span><span class="tick-text">前 1600</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1550" style="left:56.1749%"><span class="tick-top"></span><span class="tick-text">前 1550</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-100 step-50" data-yr="1500" style="left:57.5771%"><span class="tick-top"></span><span class="tick-text">前 1500</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1450" style="left:58.9792%"><span class="tick-top"></span><span class="tick-text">前 1450</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="1400" style="left:60.3813%"><span class="tick-top"></span><span class="tick-text">前 1400</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1350" style="left:61.7835%"><span class="tick-top"></span><span class="tick-text">前 1350</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="1300" style="left:63.1856%"><span class="tick-top"></span><span class="tick-text">前 1300</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1250" style="left:64.5878%"><span class="tick-top"></span><span class="tick-text">前 1250</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="1200" style="left:65.9899%"><span class="tick-top"></span><span class="tick-text">前 1200</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1150" style="left:67.3920%"><span class="tick-top"></span><span class="tick-text">前 1150</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="1100" style="left:68.7942%"><span class="tick-top"></span><span class="tick-text">前 1100</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="1050" style="left:70.1963%"><span class="tick-top"></span><span class="tick-text">前 1050</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-200 step-100 step-50" data-yr="1000" style="left:71.5985%"><span class="tick-top"></span><span class="tick-text">前 1000</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="950" style="left:73.0006%"><span class="tick-top"></span><span class="tick-text">前 950</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="900" style="left:74.4028%"><span class="tick-top"></span><span class="tick-text">前 900</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="850" style="left:75.8049%"><span class="tick-top"></span><span class="tick-text">前 850</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="800" style="left:77.2070%"><span class="tick-top"></span><span class="tick-text">前 800</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="750" style="left:78.6092%"><span class="tick-top"></span><span class="tick-text">前 750</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="700" style="left:80.0113%"><span class="tick-top"></span><span class="tick-text">前 700</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="650" style="left:81.4135%"><span class="tick-top"></span><span class="tick-text">前 650</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="600" style="left:82.8156%"><span class="tick-top"></span><span class="tick-text">前 600</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="550" style="left:84.2177%"><span class="tick-top"></span><span class="tick-text">前 550</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-100 step-50" data-yr="500" style="left:85.6199%"><span class="tick-top"></span><span class="tick-text">前 500</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="450" style="left:87.0220%"><span class="tick-top"></span><span class="tick-text">前 450</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="400" style="left:88.4242%"><span class="tick-top"></span><span class="tick-text">前 400</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="350" style="left:89.8263%"><span class="tick-top"></span><span class="tick-text">前 350</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="300" style="left:91.2284%"><span class="tick-top"></span><span class="tick-text">前 300</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="250" style="left:92.6306%"><span class="tick-top"></span><span class="tick-text">前 250</span><span class="tick-bot"></span></div><div class="axis-tick step-200 step-100 step-50" data-yr="200" style="left:94.0327%"><span class="tick-top"></span><span class="tick-text">前 200</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="150" style="left:95.4349%"><span class="tick-top"></span><span class="tick-text">前 150</span><span class="tick-bot"></span></div><div class="axis-tick step-100 step-50" data-yr="100" style="left:96.8370%"><span class="tick-top"></span><span class="tick-text">前 100</span><span class="tick-bot"></span></div><div class="axis-tick step-50" data-yr="50" style="left:98.2391%"><span class="tick-top"></span><span class="tick-text">前 50</span><span class="tick-bot"></span></div><div class="axis-tick step-500 step-200 step-100 step-50" data-yr="30" style="left:98.8000%"><span class="tick-top"></span><span class="tick-text">前 30</span><span class="tick-bot"></span></div>
+          <span id="beam-axis-pill" class="beam-axis-pill"></span>
         </div>
 
         <!-- China Track -->
@@ -1933,13 +2959,28 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
         </section>
       </div>
     </main>
+    <div id="m-timeline-toast" class="m-timeline-toast" role="status" aria-live="polite"></div>
   </section>
+
+  <!-- Mobile Cluster Selection Bottom Sheet -->
+  <div id="m-cluster-sheet-backdrop" class="m-cluster-sheet-backdrop" role="dialog" aria-modal="true" aria-label="密集節點法老名單">
+    <div class="m-cluster-sheet">
+      <div class="m-cluster-sheet-head">
+        <span id="m-cluster-sheet-title" class="m-cluster-sheet-title">選擇法老</span>
+        <button type="button" id="m-cluster-sheet-close" class="m-cluster-sheet-close">✕ 關閉</button>
+      </div>
+      <div id="m-cluster-sheet-list" class="m-cluster-sheet-list"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Lightbox Modal -->
 <div id="lightbox-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="圖片放大檢視">
   <div class="lightbox-dialog">
-    <button type="button" id="lightbox-close-btn" class="modal-close-btn">✕ 關閉 (Esc)</button>
+    <div class="lightbox-header-bar">
+      <span class="m-only" style="font-size:14px;font-weight:800;color:var(--gold-bright)">圖片放大檢視</span>
+      <button type="button" id="lightbox-close-btn" class="modal-close-btn">✕ 關閉<span class="esc-hint"> (Esc)</span></button>
+    </div>
     <div class="lightbox-img-wrap">
       <img id="lightbox-img" class="lightbox-img" src="img/013_narmer_palette.jpg" alt="放大預覽" loading="lazy">
     </div>
@@ -1956,8 +2997,10 @@ body.star-only-mode .pharaoh-node[data-star="false"] {
 <!-- All Images Sources & Licenses Modal -->
 <div id="credits-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="圖片來源與授權清單">
   <div class="credits-dialog">
-    <button type="button" id="credits-close-btn" class="modal-close-btn">✕ 關閉 (Esc)</button>
-    <h2 class="credits-title">圖片來源與授權清單（Wikimedia Commons 離線封裝）</h2>
+    <div class="credits-header-bar">
+      <h2 class="credits-title">圖片來源與授權清單（Wikimedia Commons 離線封裝）</h2>
+      <button type="button" id="credits-close-btn" class="modal-close-btn">✕ 關閉<span class="esc-hint"> (Esc)</span></button>
+    </div>
     <div class="credits-list-scroll">
       <table class="credits-table">
         <thead>
@@ -2106,6 +3149,78 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   const chinaSegs = Array.from(document.querySelectorAll('.china-seg'));
   const chinaEventNodes = Array.from(document.querySelectorAll('.c-event-node'));
 
+  // Mobile-specific DOM Elements & matchMedia
+  const mobileMediaQuery = window.matchMedia
+    ? window.matchMedia('(max-width: 767px), (max-height: 500px) and (pointer: coarse)')
+    : { matches: window.innerWidth < 768 };
+  function isMobileLayout() {
+    return Boolean(mobileMediaQuery && mobileMediaQuery.matches);
+  }
+
+  const searchWrapEl = document.getElementById('search-wrap');
+  const mSearchOpenBtn = document.getElementById('m-search-open-btn');
+  const mSearchCloseBtn = document.getElementById('m-search-close-btn');
+  const mCreditsTopBtn = document.getElementById('m-credits-top-btn');
+  const mCreditsInlineBtn = document.getElementById('m-credits-inline-btn');
+  const mJumpBar = document.getElementById('m-jump-bar');
+  const mImgSwitcherGroup = document.getElementById('m-img-switcher-group');
+  const mImgPrevBtn = document.getElementById('m-img-prev-btn');
+  const mImgNextBtn = document.getElementById('m-img-next-btn');
+  const mImgCounter = document.getElementById('m-img-counter');
+  const mImgZoomBtn = document.getElementById('m-img-zoom-btn');
+  const mChinaSummaryBtn = document.getElementById('m-china-summary-btn');
+  const mChinaSummaryText = document.getElementById('m-china-summary-text');
+
+  const mDockPrevBtn = document.getElementById('m-dock-prev-btn');
+  const mDockNextBtn = document.getElementById('m-dock-next-btn');
+  const mDockName = document.getElementById('m-dock-name');
+  const mDockYear = document.getElementById('m-dock-year');
+  const mMiniOverviewBtn = document.getElementById('m-mini-overview-btn');
+  const mMiniBeam = document.getElementById('m-mini-beam');
+  const mMiniMatchLabel = document.getElementById('m-mini-match-label');
+  const mMiniEgyptSegs = Array.from(document.querySelectorAll('.m-mini-egypt-seg'));
+  const mMiniChinaSegs = Array.from(document.querySelectorAll('.m-mini-china-seg'));
+
+  const timelineWrapperEl = document.getElementById('timeline-wrapper');
+  const mTlCloseBtn = document.getElementById('m-tl-close-btn');
+  const mTlPeriodSelect = document.getElementById('m-tl-period-select');
+  const mZoomInBtn = document.getElementById('m-zoom-in-btn');
+  const mZoomOutBtn = document.getElementById('m-zoom-out-btn');
+  const mZoomResetBtn = document.getElementById('m-zoom-reset-btn');
+  const mZoomReadout = document.getElementById('m-zoom-readout');
+  const mClustersLayer = document.getElementById('m-clusters-layer');
+  const mTimelineToast = document.getElementById('m-timeline-toast');
+  const mClusterSheetBackdrop = document.getElementById('m-cluster-sheet-backdrop');
+  const mClusterSheetTitle = document.getElementById('m-cluster-sheet-title');
+  const mClusterSheetClose = document.getElementById('m-cluster-sheet-close');
+  const mClusterSheetList = document.getElementById('m-cluster-sheet-list');
+
+  const CHINA_SHORT_NAMES = {
+    prehistoric_china: '史前中國',
+    neolithic: '新石器文化',
+    xia: '夏朝',
+    shang_early: '商前期',
+    shang_late: '商後期',
+    west_zhou: '西周',
+    spring_autumn: '春秋',
+    warring_states: '戰國',
+    qin: '秦朝',
+    west_han: '西漢'
+  };
+
+  const CHINA_COMPACT_SUMMARY = {
+    prehistoric_china: '史前中國｜約前 30萬–3300',
+    neolithic: '新石器文化｜前 3300–2070',
+    xia: '夏朝｜約前 2070–1600',
+    shang_early: '商前期｜前 1600–1300',
+    shang_late: '商後期｜約前 1300–1046',
+    west_zhou: '西周｜前 1046–771',
+    spring_autumn: '春秋｜前 770–476',
+    warring_states: '戰國｜前 475–221',
+    qin: '秦朝｜前 221–207',
+    west_han: '西漢｜前 202–前 30'
+  };
+
   let zoomLevel = 1.0;
   let starOnly = false;
   let selectedIdx = 13; // Default: 納爾邁
@@ -2113,6 +3228,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   let currentImgPos = 0;
   let currentChinaImgObj = null;
   let fadeTimer = null;
+  let toastTimer = null;
 
   // Measure and cache natural pill widths for all 178 pharaoh labels (full text, zero truncation)
   const cachedLabelWidths = new Array(pharaohNodes.length);
@@ -2269,9 +3385,29 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     const selNode = document.getElementById('pnode-' + selectedIdx);
     const selPct = selNode ? parseFloat(selNode.dataset.pct || '0') : -100;
     const beamCenterPx = (selPct / 100.0) * stageW;
-    const beamPillHalfW = 58;
+    const pillActualW = (beamPill && beamPill.offsetWidth > 20)
+      ? beamPill.offsetWidth
+      : (estimateTextPx(beamPill ? beamPill.textContent : '', 12.0, 7.6) + 22);
 
-    let lastTickRight = 108; // Reserve left area for sticky "共用年代軸" badge + "//" break
+    // Clamp beamPill using exact pixel left coordinate on mobile so it is never clipped on left (#sel=0) or right (#sel=177) (CR #7), while keeping desktop percentage centering identical to v3.1 (CR #1)
+    const minLeft = 5;
+    const maxRight = stageW - 5;
+    let pillLeftEdge = beamCenterPx - 58;
+    let pillRightEdge = beamCenterPx + 58;
+    if (beamPill) {
+      if (isMobileLayout()) {
+        const clampedCenterPx = Math.ceil(Math.max(minLeft + pillActualW / 2, Math.min(maxRight - pillActualW / 2, beamCenterPx)));
+        pillLeftEdge = clampedCenterPx - pillActualW / 2;
+        pillRightEdge = clampedCenterPx + pillActualW / 2;
+        beamPill.style.left = clampedCenterPx + 'px';
+        beamPill.style.transform = 'translate(-50%, -50%)';
+      } else {
+        beamPill.style.left = selPct + '%';
+        beamPill.style.transform = 'translate(-50%, -50%)';
+      }
+    }
+
+    let lastTickRight = isMobileLayout() ? 78 : 108; // Reserve left area for sticky "共用年代軸" badge + "//" break
     for (const tick of axisTicks) {
       const eligible = tick.classList.contains(stepClass);
       if (!eligible) {
@@ -2284,7 +3420,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       const w = txt ? (estimateTextPx(txt.textContent, 12.0, 7.6) + 8) : 48;
       const leftPx = centerPx - w / 2;
       const rightPx = centerPx + w / 2;
-      const hitsBeamPill = !(rightPx + 4 < beamCenterPx - beamPillHalfW || leftPx - 4 > beamCenterPx + beamPillHalfW);
+      const hitsBeamPill = !(rightPx + 4 < pillLeftEdge || leftPx - 4 > pillRightEdge);
       if (!hitsBeamPill && leftPx >= lastTickRight + 8 && rightPx <= stageW - 6) {
         tick.classList.remove('tick-hidden');
         lastTickRight = rightPx;
@@ -2292,45 +3428,219 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         tick.classList.add('tick-hidden');
       }
     }
+
+    // 5. Fit China Major Events labels ONLY on mobile so desktop retains exact v3.1 alignment (CR #1)
+    if (isMobileLayout()) {
+      // Fit China Major Events labels on mobile: keep visible events >=22px apart horizontally so their 44px touch targets don't swallow adjacent dots (CR #6)
+      const cRowLastRight = [-9999, -9999, -9999];
+      for (const evNode of chinaEventNodes) {
+        const rIdx = parseInt(evNode.dataset.row || '0', 10);
+        const evPct = parseFloat(evNode.dataset.pct || '0');
+        const evX = (evPct / 100.0) * stageW;
+        const lbl = evNode.querySelector('.c-event-label');
+        if (!lbl) continue;
+        const lw = estimateTextPx(lbl.textContent, 12.0, 7.5) + 14;
+        const nearRight = (evX + lw + 8 > stageW);
+        evNode.classList.toggle('align-right', nearRight);
+        const rawLeftPx = nearRight ? (evX - lw - 5) : (evX + 5);
+        const rawRightPx = rawLeftPx + lw;
+        // Also check if another row-0 event dot lies inside [rawLeftPx - 14, rawRightPx + 14]
+        const coversOtherSameRowDot = chinaEventNodes.some(other => {
+          if (other === evNode) return false;
+          if (parseInt(other.dataset.row || '0', 10) !== rIdx) return false;
+          const ox = (parseFloat(other.dataset.pct || '0') / 100.0) * stageW;
+          return ox >= rawLeftPx - 14 && ox <= rawRightPx + 14;
+        });
+        if (zoomLevel < 1.8 && (rawLeftPx < cRowLastRight[rIdx] + 6 || rawLeftPx < 8 || rawRightPx > stageW - 4 || coversOtherSameRowDot)) {
+          lbl.style.display = 'none';
+        } else {
+          lbl.style.display = 'block';
+          cRowLastRight[rIdx] = Math.max(cRowLastRight[rIdx], rawRightPx);
+        }
+      }
+    } else {
+      for (const evNode of chinaEventNodes) {
+        const origAlign = evNode.dataset.align || 'right';
+        evNode.classList.toggle('align-right', origAlign === 'right');
+        const lbl = evNode.querySelector('.c-event-label');
+        if (lbl) lbl.style.display = '';
+      }
+    }
   }
 
-  // Three-Level Semantic Zoom Layout (R1 Section 4.2)
+  function openClusterSheet(indices, periodTitle) {
+    if (!mClusterSheetBackdrop || !mClusterSheetList) return;
+    mClusterSheetTitle.textContent = (periodTitle ? periodTitle + '｜' : '') + '此區段法老（共 ' + indices.length + ' 位）';
+    mClusterSheetList.innerHTML = '';
+    indices.forEach(idx => {
+      const d = TIMELINE_DATA[idx];
+      const isStar = (d.tag || '').includes('★');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'm-cluster-item-btn' + (idx === selectedIdx ? ' is-current' : '');
+      btn.innerHTML =
+        '<span>' + (isStar ? '<span style="color:var(--gold-bright);margin-right:4px">★</span>' : '') +
+        '#' + (idx + 1) + ' ' + d.name + ' <small style="color:var(--text-muted);font-weight:500">（' + d.dynasty + '）</small></span>' +
+        '<span style="color:var(--gold-bright);font-size:12.5px;white-space:nowrap">' + d.year + '</span>';
+      btn.addEventListener('click', () => {
+        closeClusterSheet();
+        selectPharaoh(idx, true, true);
+        if (history.replaceState) history.replaceState(null, '', '#sel=' + idx);
+        if (isMobileLayout()) {
+          closeMobileTimelineModal(true);
+        }
+      });
+      mClusterSheetList.appendChild(btn);
+    });
+    mClusterSheetBackdrop.classList.add('open');
+  }
+
+  function closeClusterSheet() {
+    if (mClusterSheetBackdrop) mClusterSheetBackdrop.classList.remove('open');
+  }
+  if (mClusterSheetClose) mClusterSheetClose.addEventListener('click', closeClusterSheet);
+  if (mClusterSheetBackdrop) {
+    mClusterSheetBackdrop.addEventListener('click', (e) => {
+      if (e.target === mClusterSheetBackdrop) closeClusterSheet();
+    });
+  }
+
+  function renderMobileClusters(unplacedIndices, stageW, topReserved, availH, laneStep, maxLanes, lanes) {
+    if (!mClustersLayer) return;
+    mClustersLayer.innerHTML = '';
+    if (!isMobileLayout() || !unplacedIndices.length) return;
+
+    // Group unplaced eligible nodes into spatial buckets (~68px apart)
+    const sorted = unplacedIndices.slice().sort((a, b) => a - b);
+    const groups = [];
+    const minBucketDistPx = 68;
+    for (const idx of sorted) {
+      const node = document.getElementById('pnode-' + idx);
+      const pct = node ? parseFloat(node.dataset.pct || '0') : 0;
+      const x = (pct / 100.0) * stageW;
+      const lastG = groups[groups.length - 1];
+      if (lastG && Math.abs(x - lastG.centerX) <= minBucketDistPx) {
+        lastG.indices.push(idx);
+        lastG.sumX += x;
+        lastG.sumPct += pct;
+        lastG.centerX = lastG.sumX / lastG.indices.length;
+        lastG.centerPct = lastG.sumPct / lastG.indices.length;
+      } else {
+        groups.push({
+          indices: [idx],
+          sumX: x,
+          sumPct: pct,
+          centerX: x,
+          centerPct: pct,
+          period: TIMELINE_DATA[idx].period
+        });
+      }
+    }
+
+    // Place cluster pills in the dedicated band below Lane 1 (above the density dots); merge colliding groups (iteratively until convergence) so ZERO unplaced pharaohs are ever dropped (CR #3)
+    const clusterY = Math.round(egyptZone.clientHeight - 24);
+    function updateGroupLayout(grp) {
+      const hasStar = grp.indices.some(i => (TIMELINE_DATA[i].tag || '').includes('★'));
+      grp.txt = (hasStar ? '★+' : '+') + grp.indices.length + '位';
+      grp.estW = Math.max(46, estimateTextPx(grp.txt, 12.0, 7.5) + 18);
+      grp.centerX = grp.sumX / grp.indices.length;
+      grp.centerPct = grp.sumPct / grp.indices.length;
+      grp.clLeft = Math.max(4, Math.min(stageW - grp.estW - 4, grp.centerX - grp.estW / 2));
+      grp.clRight = grp.clLeft + grp.estW;
+    }
+
+    let renderedGroups = groups.map(g => {
+      const copy = {
+        indices: g.indices.slice(),
+        sumX: g.sumX,
+        sumPct: g.sumPct,
+        centerX: g.centerX,
+        centerPct: g.centerPct,
+        period: g.period
+      };
+      updateGroupLayout(copy);
+      return copy;
+    });
+
+    let mergedAny = true;
+    while (mergedAny && renderedGroups.length > 1) {
+      mergedAny = false;
+      const nextList = [];
+      for (const g of renderedGroups) {
+        const prevG = nextList[nextList.length - 1];
+        if (prevG && g.clLeft < prevG.clRight + 6) {
+          prevG.indices.push(...g.indices);
+          prevG.sumX += g.sumX;
+          prevG.sumPct += g.sumPct;
+          updateGroupLayout(prevG);
+          mergedAny = true;
+        } else {
+          nextList.push(g);
+        }
+      }
+      renderedGroups = nextList;
+    }
+
+    for (const rg of renderedGroups) {
+      const clampedPct = ((rg.clLeft + rg.estW / 2) / stageW) * 100.0;
+      const wrap = document.createElement('div');
+      wrap.className = 'cluster-badge-node';
+      wrap.style.left = clampedPct.toFixed(4) + '%';
+      wrap.style.setProperty('--cluster-y', clusterY + 'px');
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'cluster-pill';
+      pill.textContent = rg.txt;
+      pill.setAttribute('aria-label', rg.period + ' 其他 ' + rg.indices.length + ' 位法老');
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openClusterSheet(rg.indices, rg.period);
+      });
+      wrap.appendChild(pill);
+      mClustersLayer.appendChild(wrap);
+    }
+  }
+
+  // Three-Level Semantic Zoom Layout (R1 Section 4.2 + SPEC_mobile #5)
   function layoutTimeline() {
-    const viewW = viewport.clientWidth || window.innerWidth || 1440;
-    const baseW = Math.max(viewW, 1440);
+    const isMob = isMobileLayout();
+    const viewW = viewport.clientWidth || window.innerWidth || (isMob ? 390 : 1440);
+    // On mobile, 1.0x Full View fits the entire timeline inside container width (no 1440px min-width!)
+    const baseW = isMob ? viewW : Math.max(viewW, 1440);
     const stageW = Math.round(baseW * zoomLevel);
     stage.style.width = stageW + 'px';
 
     ensureLabelWidthsMeasured();
     fitTimelineBandsAndTicks(stageW);
 
-    const egyptH = egyptZone.clientHeight || 200;
-    const isMobile = window.innerWidth < 768;
-    const topReserved = isMobile ? 28 : 44;
-    const bottomDotZone = isMobile ? 16 : 24;
-    const availH = Math.max(72, egyptH - topReserved - bottomDotZone);
+    const egyptH = egyptZone.clientHeight || (isMob ? 190 : 200);
+    const topReserved = isMob ? 50 : 44;
+    const bottomDotZone = isMob ? 44 : 24;
+    const rawAvailH = egyptH - topReserved - bottomDotZone;
+    const availH = isMob ? Math.max(44, Math.min(72, rawAvailH)) : Math.max(72, rawAvailH);
 
-    // Level 1: 1.0x - <2.0x (Full view: strictly 21 ★ labels + 157 dots)
-    // Level 2: 2.0x - <4.5x (Greedy priority placement, max 4 lanes)
-    // Level 3: >= 4.5x (Detail view, up to 5 lanes)
-    const maxLanes = (zoomLevel >= 4.5 && !isMobile) ? 5 : 4;
+    // Mobile strictly caps at max 2 swimlanes (SPEC_mobile #5); desktop uses 4 or 5 lanes
+    const maxLanes = isMob ? 2 : (zoomLevel >= 4.5 ? 5 : 4);
     const laneStep = availH / maxLanes;
     const lanes = Array.from({ length: maxLanes }, () => []);
-    if (!isMobile && zoomLevel < 1.35) {
-      // Reserve top-right space in Lane 0 for the floating zoom controls bar
+    if (!isMob && zoomLevel < 1.35) {
+      // Reserve top-right space in Lane 0 for the desktop floating zoom controls bar
       lanes[0].push([stageW - 154, stageW]);
     }
-    const gapX = 6;
+    if (isMob && zoomLevel < 1.35) {
+      // Reserve top-left space in Lane 0 for the sticky '古埃及軌' badge
+      lanes[0].push([0, 54]);
+    }
+    const gapX = isMob ? 3 : 6;
 
     // Assign baseline Histography-style density dot Y coordinates for all nodes
     for (const node of pharaohNodes) {
       const idx = parseInt(node.dataset.index, 10);
       const dotRow = idx % 3;
-      const dotY = egyptH - 6 - dotRow * (isMobile ? 4 : 5);
+      const dotY = egyptH - 6 - dotRow * (isMob ? 4 : 5);
       node.style.setProperty('--dot-y', dotY + 'px');
     }
 
-    // Step 1: Always place the 21 ★ Representative Pharaohs first using density-aware left/right alignment
     const starNodes = pharaohNodes.filter(n => n.dataset.star === 'true');
     const starCoords = starNodes.map(n => {
       const idx = parseInt(n.dataset.index, 10);
@@ -2340,19 +3650,17 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
     const neighborRadius = stageW * 0.097;
     let visibleLabelCount = 0;
+    const unplacedMobileIndices = [];
 
-    for (const item of starCoords) {
-      const { node, idx, x, w } = item;
-      const leftN = starCoords.filter(o => o.x > x - neighborRadius && o.x < x).length;
-      const rightN = starCoords.filter(o => o.x > x && o.x < x + neighborRadius).length;
-      const alignOrder = rightN > leftN ? ['right', 'left'] : ['left', 'right'];
-
+    function tryPlaceNodeLabel(node, idx, x, w, preferredAlignOrder, startLaneOffset) {
       let placed = null;
-      for (const align of alignOrder) {
+      const minEdge = isMob ? 2 : 2;
+      for (const align of preferredAlignOrder) {
         const l = align === 'left' ? (x - 4) : (x + 4 - w);
         const r = l + w;
-        if (l < 2 || r > stageW - 2) continue;
-        for (let ln = 0; ln < maxLanes; ln++) {
+        if (l < minEdge || r > stageW - minEdge) continue;
+        for (let s = 0; s < maxLanes; s++) {
+          const ln = ((startLaneOffset || 0) + s) % maxLanes;
           const ok = lanes[ln].every(([il, ir]) => (r + gapX <= il || l >= ir + gapX));
           if (ok) {
             placed = { ln, align, l, r };
@@ -2361,24 +3669,65 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         }
         if (placed) break;
       }
-
+      // If selected node is near the very left or right edge and standard left/right overflows stageW, clamp inside stageW
+      if (!placed && idx === selectedIdx) {
+        const align = (x + w - 4 <= stageW - 2) ? 'left' : 'right';
+        const l = Math.max(2, Math.min(stageW - w - 2, align === 'left' ? (x - 4) : (x + 4 - w)));
+        const r = l + w;
+        placed = { ln: 0, align, l, r };
+      }
       if (placed) {
         lanes[placed.ln].push([placed.l, placed.r]);
         node.classList.remove('is-dot-only');
         node.classList.toggle('align-right', placed.align === 'right');
+        const naturalLeft = placed.align === 'left' ? (x - 4) : (x + 4 - w);
+        const shiftPx = Math.round(placed.l - naturalLeft);
+        node.style.setProperty('--lbl-shift-x', shiftPx + 'px');
         const laneY = Math.round(topReserved + placed.ln * laneStep + laneStep * 0.45);
         node.style.setProperty('--lane-y', laneY + 'px');
         visibleLabelCount++;
-      } else {
-        node.classList.add('is-dot-only');
+        return true;
+      }
+      node.style.removeProperty('--lbl-shift-x');
+      node.classList.add('is-dot-only');
+      return false;
+    }
+
+    // Step 0 (Mobile & Desktop): Currently selected pharaoh ALWAYS gets highest priority so its name is ALWAYS shown (even if non-★, SPEC #5 / RV1 #6)
+    const selNodeEl = document.getElementById('pnode-' + selectedIdx);
+    const selIsStar = selNodeEl && selNodeEl.dataset.star === 'true';
+    if (isMob && selNodeEl) {
+      const selPct = parseFloat(selNodeEl.dataset.pct || '0');
+      const selX = (selPct / 100.0) * stageW;
+      const selW = cachedLabelWidths[selectedIdx] || 92;
+      const selAlignOrder = (selX > stageW * 0.65) ? ['right', 'left'] : ['left', 'right'];
+      tryPlaceNodeLabel(selNodeEl, selectedIdx, selX, selW, selAlignOrder, 0);
+    }
+
+    // Step 1: Place the 21 ★ Representative Pharaohs using density-aware left/right alignment
+    for (const item of starCoords) {
+      const { node, idx, x, w } = item;
+      if (isMob && idx === selectedIdx) continue; // Already placed at Step 0
+      const leftN = starCoords.filter(o => o.x > x - neighborRadius && o.x < x).length;
+      const rightN = starCoords.filter(o => o.x > x && o.x < x + neighborRadius).length;
+      const alignOrder = rightN > leftN ? ['right', 'left'] : ['left', 'right'];
+
+      const ok = tryPlaceNodeLabel(node, idx, x, w, alignOrder, 0);
+      if (!ok && isMob) {
+        unplacedMobileIndices.push(idx);
       }
     }
 
-    // Step 2: If Level 1 (< 2.0x) or starOnly mode, all 157 non-★ nodes remain dot-only
+    // Step 2: Non-★ nodes
     const nonStarNodes = pharaohNodes.filter(n => n.dataset.star !== 'true');
     if (zoomLevel < 2.0 || starOnly) {
       for (const node of nonStarNodes) {
+        const idx = parseInt(node.dataset.index, 10);
+        if (isMob && idx === selectedIdx) continue; // Keep selected non-★ label visible!
         node.classList.add('is-dot-only');
+        if (isMob && !starOnly) {
+          unplacedMobileIndices.push(idx);
+        }
       }
     } else {
       // Level 2 & Level 3: Greedy Priority Placement (selected -> ◆ prehistoric -> reign length -> order)
@@ -2398,40 +3747,21 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
       for (const node of prioritized) {
         const idx = parseInt(node.dataset.index, 10);
+        if (isMob && idx === selectedIdx) continue;
         const pct = parseFloat(node.dataset.pct || '0');
         const x = (pct / 100.0) * stageW;
         const w = cachedLabelWidths[idx] || 84;
         const tipGroup = parseInt(node.dataset.tipGroup || '-1', 10);
         const prefStartLane = tipGroup >= 0 ? (tipGroup % maxLanes) : (idx % maxLanes);
 
-        let placed = null;
-        for (const align of ['left', 'right']) {
-          const l = align === 'left' ? (x - 4) : (x + 4 - w);
-          const r = l + w;
-          if (l < 4 || r > stageW - 4) continue;
-          for (let s = 0; s < maxLanes; s++) {
-            const ln = (prefStartLane + s) % maxLanes;
-            const ok = lanes[ln].every(([il, ir]) => (r + gapX <= il || l >= ir + gapX));
-            if (ok) {
-              placed = { ln, align, l, r };
-              break;
-            }
-          }
-          if (placed) break;
-        }
-
-        if (placed) {
-          lanes[placed.ln].push([placed.l, placed.r]);
-          node.classList.remove('is-dot-only');
-          node.classList.toggle('align-right', placed.align === 'right');
-          const laneY = Math.round(topReserved + placed.ln * laneStep + laneStep * 0.45);
-          node.style.setProperty('--lane-y', laneY + 'px');
-          visibleLabelCount++;
-        } else {
-          node.classList.add('is-dot-only');
+        const ok = tryPlaceNodeLabel(node, idx, x, w, ['left', 'right'], prefStartLane);
+        if (!ok && isMob && !starOnly) {
+          unplacedMobileIndices.push(idx);
         }
       }
     }
+
+    renderMobileClusters(unplacedMobileIndices, stageW, topReserved, availH, laneStep, maxLanes, lanes);
 
     if (axisZone && stage) {
       const axisCenter = egyptZone.clientHeight + (axisZone.clientHeight / 2);
@@ -2494,6 +3824,15 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     imgNextBtn.style.display = multi ? 'flex' : 'none';
     imgDotsBar.style.display = multi ? 'inline-flex' : 'none';
 
+    if (mImgCounter) {
+      mImgCounter.textContent = (currentImgPos + 1) + ' / ' + currentImages.length;
+    }
+    if (mImgSwitcherGroup) {
+      mImgSwitcherGroup.style.display = multi ? 'inline-flex' : 'none';
+    }
+    if (mImgPrevBtn) mImgPrevBtn.disabled = !multi;
+    if (mImgNextBtn) mImgNextBtn.disabled = !multi;
+
     if (multi) {
       Array.from(imgDotsBar.children).forEach((btn, i) => {
         btn.classList.toggle('active', i === currentImgPos);
@@ -2531,6 +3870,33 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     e.stopPropagation();
     renderStageImage(currentImgPos + 1);
   });
+  if (mImgPrevBtn) {
+    mImgPrevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderStageImage(currentImgPos - 1);
+    });
+  }
+  if (mImgNextBtn) {
+    mImgNextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderStageImage(currentImgPos + 1);
+    });
+  }
+  if (mImgZoomBtn) {
+    mImgZoomBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentImages && currentImages[currentImgPos]) {
+        openLightbox(currentImages[currentImgPos]);
+      }
+    });
+  }
+
+  function scrollToMobileContentTop() {
+    if (!isMobileLayout()) return;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
 
   // Select a Pharaoh and update Story Main Stage + Dual-Track Timeline
   function selectPharaoh(idx, scrollIfNeeded, animateStage) {
@@ -2556,10 +3922,51 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
     // Update Highlight Beam & Active China Dynasty Band
     beam.style.left = pct + '%';
-    beamPill.textContent = d.year;
+    if (beamPill) {
+      beamPill.style.left = pct + '%';
+      beamPill.textContent = d.year;
+    }
     chinaSegs.forEach(seg => {
       seg.classList.toggle('active-china-band', seg.dataset.bandId === cBandId);
     });
+
+    // Update Mobile Mini Overview Bar & Persistent Bottom Dock
+    const isStarPharaoh = (d.tag || '').includes('★');
+    if (mDockName) {
+      mDockName.textContent = (isStarPharaoh ? '★ ' : '') + d.name + ' (#' + (idx + 1) + ')';
+    }
+    if (mDockYear) {
+      mDockYear.textContent = d.year;
+    }
+    if (mChinaSummaryText) {
+      mChinaSummaryText.textContent = CHINA_COMPACT_SUMMARY[cBandId] || CHINA_BAND_NAMES[cBandId] || d.china;
+    }
+    if (mMiniBeam) {
+      let miniPct = 0;
+      if (idx > 8) {
+        miniPct = Math.max(0.5, Math.min(99.5, ((pct - 7.1) / 91.7) * 100.0));
+      } else {
+        miniPct = 0.5;
+      }
+      mMiniBeam.style.left = miniPct.toFixed(2) + '%';
+    }
+    if (mMiniMatchLabel) {
+      const cnShort = CHINA_SHORT_NAMES[cBandId] || '新石器文化';
+      mMiniMatchLabel.textContent = d.period + ' ⇄ ' + cnShort;
+    }
+    mMiniEgyptSegs.forEach(seg => {
+      seg.classList.toggle('is-active-mini', seg.dataset.period === d.period);
+    });
+    mMiniChinaSegs.forEach(seg => {
+      seg.classList.toggle('is-active-mini', seg.dataset.bandId === cBandId);
+    });
+    if (mJumpBar) {
+      Array.from(mJumpBar.querySelectorAll('.jump-btn')).forEach(jbtn => {
+        const jtxt = jbtn.textContent.trim();
+        const isMatch = d.period.includes(jtxt) || (jtxt.includes('史前') && (idx <= 12));
+        jbtn.classList.toggle('active-period', isMatch);
+      });
+    }
 
     // Update Main Stage Left (Images)
     currentImages = imgs;
@@ -2637,6 +4044,9 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     }
 
     stageRightScroll.scrollTop = 0;
+    if (scrollIfNeeded && isMobileLayout()) {
+      scrollToMobileContentTop();
+    }
     layoutTimeline();
 
     // Smoothly center timeline if node is outside current viewport (or immediately on initial load/mobile)
@@ -2663,10 +4073,12 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     zoomLevel = clamped;
     zoomReadout.textContent = zoomLevel.toFixed(1) + '×';
     zoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
+    if (mZoomReadout) mZoomReadout.textContent = zoomLevel.toFixed(1) + '×';
+    if (mZoomResetBtn) mZoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
 
     layoutTimeline();
 
-    const newStageW = stage.clientWidth;
+    const newStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
     if (newStageW <= viewW) {
       viewport.scrollLeft = 0;
     } else {
@@ -2731,10 +4143,12 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         const hasZh = Boolean(item.caption_zh && item.caption_zh.trim());
 
         const tdEntry = document.createElement('td');
+        tdEntry.setAttribute('data-label', '對應條目：');
         tdEntry.textContent = label + (item.is_representative ? ' [代表圖]' : '');
         tr.appendChild(tdEntry);
 
         const tdTitle = document.createElement('td');
+        tdTitle.setAttribute('data-label', '圖片標題：');
         if (hasZh) {
           const zhDiv = document.createElement('div');
           zhDiv.className = 'c-cap-zh';
@@ -2752,14 +4166,17 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         tr.appendChild(tdTitle);
 
         const tdAuthor = document.createElement('td');
+        tdAuthor.setAttribute('data-label', '作者：');
         tdAuthor.textContent = item.author || '';
         tr.appendChild(tdAuthor);
 
         const tdLic = document.createElement('td');
+        tdLic.setAttribute('data-label', '授權：');
         tdLic.textContent = item.license || '';
         tr.appendChild(tdLic);
 
         const tdUrl = document.createElement('td');
+        tdUrl.setAttribute('data-label', '來源網址：');
         tdUrl.className = 'c-url';
         tdUrl.textContent = item.source_page_url || '';
         tr.appendChild(tdUrl);
@@ -2777,14 +4194,129 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
   }
 
   creditsOpenBtn.addEventListener('click', openCreditsModal);
+  if (mCreditsTopBtn) mCreditsTopBtn.addEventListener('click', openCreditsModal);
+  if (mCreditsInlineBtn) mCreditsInlineBtn.addEventListener('click', openCreditsModal);
   creditsCloseBtn.addEventListener('click', closeCreditsModal);
   creditsModal.addEventListener('click', (e) => {
     if (e.target === creditsModal) closeCreditsModal();
   });
 
+  // Mobile Search Panel Open/Close
+  function openMobileSearchPanel() {
+    if (!searchWrapEl) return;
+    searchWrapEl.classList.add('m-search-open');
+    searchInput.focus();
+    if (searchInput.value.trim()) {
+      renderSearchDropdown(searchInput.value);
+    }
+  }
+  function closeMobileSearchPanel() {
+    if (!searchWrapEl) return;
+    searchWrapEl.classList.remove('m-search-open');
+    searchDropdown.classList.remove('open');
+    searchInput.blur();
+  }
+  if (mSearchOpenBtn) mSearchOpenBtn.addEventListener('click', openMobileSearchPanel);
+  if (mSearchCloseBtn) mSearchCloseBtn.addEventListener('click', closeMobileSearchPanel);
+
+  // Mobile Full-Screen Timeline Modal Open/Close (save & lock background scrollY per CR #9)
+  let savedMobileScrollY = 0;
+  function preventBackgroundTouchMove(e) {
+    if (!timelineWrapperEl || !timelineWrapperEl.classList.contains('m-tl-open')) return;
+    if (e.target.closest('#m-cluster-sheet-list')) return;
+    // Allow horizontal scroll on timeline viewport, block vertical scroll bleed to background document
+  }
+
+  function openMobileTimelineModal() {
+    if (!timelineWrapperEl) return;
+    savedMobileScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.documentElement.style.overflowY = 'hidden';
+    timelineWrapperEl.classList.add('m-tl-open');
+    layoutTimeline();
+    if (zoomLevel > 1.05) {
+      centerSelectedPharaohOnTimeline(false);
+    } else {
+      viewport.scrollLeft = 0;
+    }
+  }
+  function closeMobileTimelineModal(scrollToTop) {
+    if (!timelineWrapperEl) return;
+    timelineWrapperEl.classList.remove('m-tl-open');
+    document.documentElement.style.overflowY = '';
+    closeClusterSheet();
+    if (mTimelineToast) mTimelineToast.classList.remove('open');
+    if (scrollToTop) {
+      scrollToMobileContentTop();
+    } else {
+      window.scrollTo({ top: savedMobileScrollY, behavior: 'auto' });
+      document.documentElement.scrollTop = savedMobileScrollY;
+    }
+  }
+  if (mMiniOverviewBtn) mMiniOverviewBtn.addEventListener('click', openMobileTimelineModal);
+  if (mChinaSummaryBtn) mChinaSummaryBtn.addEventListener('click', openMobileTimelineModal);
+  if (mTlCloseBtn) mTlCloseBtn.addEventListener('click', () => closeMobileTimelineModal(false));
+
+  if (mZoomInBtn) mZoomInBtn.addEventListener('click', () => setZoom(zoomLevel * 1.5));
+  if (mZoomOutBtn) mZoomOutBtn.addEventListener('click', () => setZoom(zoomLevel / 1.5));
+  if (mZoomResetBtn) mZoomResetBtn.addEventListener('click', () => setZoom(1.0, 50));
+
+  const JUMP_PERIOD_CONFIG = [
+    { pct: 0.0, zoom: 2.8, rep: 9 },
+    { pct: 12.709, zoom: 3.0, rep: 13 },
+    { pct: 24.318, zoom: 3.0, rep: 34 },
+    { pct: 38.480, zoom: 3.8, rep: 56 },
+    { pct: 42.013, zoom: 3.2, rep: 61 },
+    { pct: 49.781, zoom: 3.8, rep: 72 },
+    { pct: 56.175, zoom: 3.5, rep: 96 },
+    { pct: 69.635, zoom: 4.0, rep: 138 },
+    { pct: 81.021, zoom: 3.5, rep: 141 },
+    { pct: 90.331, zoom: 5.0, rep: 163 },
+    { pct: 91.088, zoom: 4.0, rep: 177 }
+  ];
+  if (mTlPeriodSelect) {
+    mTlPeriodSelect.addEventListener('change', () => {
+      const val = mTlPeriodSelect.value;
+      if (val === '') return;
+      const cfg = JUMP_PERIOD_CONFIG[parseInt(val, 10)];
+      if (cfg) {
+        const targetNode = document.getElementById('pnode-' + cfg.rep);
+        const targetPct = targetNode ? parseFloat(targetNode.dataset.pct || String(cfg.pct + 3.5)) : (cfg.pct + 3.5);
+        setZoom(cfg.zoom, targetPct);
+        const viewW = viewport.clientWidth || window.innerWidth || 390;
+        const newStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
+        viewport.scrollLeft = Math.max(0, (targetPct / 100.0) * newStageW - viewW / 2);
+        showMobileTimelineToast('已跳轉至該時期區段，點選節點即可查看法老故事');
+      }
+      mTlPeriodSelect.value = '';
+    });
+  }
+
+  function showMobileTimelineToast(msg) {
+    if (!mTimelineToast) return;
+    mTimelineToast.textContent = msg;
+    mTimelineToast.classList.add('open');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      mTimelineToast.classList.remove('open');
+    }, 3200);
+  }
+
   // Search Box Logic
   let searchMatches = [];
   let searchActivePos = 0;
+
+  function chooseSearchResult(idx) {
+    const d = TIMELINE_DATA[idx];
+    const targetIsStar = Boolean(d && d.tag && d.tag.includes('★'));
+    if (isMobileLayout() && starOnly && !targetIsStar) {
+      setStarMode(false);
+    }
+    selectPharaoh(idx, true, true);
+    if (history.replaceState) history.replaceState(null, '', '#sel=' + idx);
+    searchDropdown.classList.remove('open');
+    if (searchWrapEl) searchWrapEl.classList.remove('m-search-open');
+    searchInput.blur();
+  }
 
   function renderSearchDropdown(query) {
     const q = query.trim().toLowerCase();
@@ -2824,12 +4356,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         (isStar ? '<span class="s-star">★</span>' : '') +
         d.name + '</span><span>' + d.year + '</span></div>' +
         '<div class="search-item-sub">' + d.period + '・' + d.dynasty + ' ｜ 中國：' + d.china + '</div>';
-      div.addEventListener('click', () => {
-        selectPharaoh(idx, true, true);
-        if (history.replaceState) history.replaceState(null, '', '#sel=' + idx);
-        searchDropdown.classList.remove('open');
-        searchInput.blur();
-      });
+      div.addEventListener('click', () => chooseSearchResult(idx));
       searchDropdown.appendChild(div);
     });
     searchDropdown.classList.add('open');
@@ -2855,21 +4382,19 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     } else if (e.key === 'Enter' && searchMatches.length) {
       e.preventDefault();
       const targetIdx = searchMatches[searchActivePos] ?? searchMatches[0];
-      selectPharaoh(targetIdx, true, true);
-      if (history.replaceState) history.replaceState(null, '', '#sel=' + targetIdx);
-      searchDropdown.classList.remove('open');
-      searchInput.blur();
+      chooseSearchResult(targetIdx);
     }
   });
 
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-wrap')) {
+    if (!e.target.closest('.search-wrap') && !e.target.closest('#m-search-open-btn')) {
       searchDropdown.classList.remove('open');
     }
   });
 
-  // Hover Tooltips on Pharaoh Nodes & Timeline Bands
+  // Hover Tooltips on Pharaoh Nodes & Timeline Bands (plus tap Toast on mobile full-screen timeline)
   function showTooltip(text, clientX, clientY) {
+    if (isMobileLayout()) return;
     tooltip.textContent = text;
     tooltip.style.display = 'block';
     const tw = tooltip.offsetWidth;
@@ -2889,6 +4414,9 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       const idx = parseInt(node.dataset.index, 10);
       selectPharaoh(idx, true, true);
       if (history.replaceState) history.replaceState(null, '', '#sel=' + idx);
+      if (isMobileLayout()) {
+        closeMobileTimelineModal(true);
+      }
     });
 
     node.addEventListener('mouseenter', (e) => {
@@ -2901,11 +4429,84 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     node.addEventListener('mouseleave', hideTooltip);
   });
 
+  // Helper to show nearby segments/events when tapping a narrow band or event marker on mobile (CR #6)
+  function handleMobileTimelineInfoTap(items, defaultSingleMsg) {
+    if (!items || !items.length) {
+      if (defaultSingleMsg) showMobileTimelineToast(defaultSingleMsg);
+      return;
+    }
+    if (items.length === 1) {
+      showMobileTimelineToast(items[0]);
+      return;
+    }
+    // Show expandable >=44px list sheet when tapping a crowded/narrow region
+    if (!mClusterSheetBackdrop || !mClusterSheetList) {
+      showMobileTimelineToast(items.join(' ／ '));
+      return;
+    }
+    mClusterSheetTitle.textContent = '此時間區段時期／朝代／大事（共 ' + items.length + ' 項）';
+    mClusterSheetList.innerHTML = '';
+    items.forEach(txt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'm-cluster-item-btn';
+      btn.textContent = txt;
+      btn.addEventListener('click', () => {
+        closeClusterSheet();
+        showMobileTimelineToast(txt);
+      });
+      mClusterSheetList.appendChild(btn);
+    });
+    mClusterSheetBackdrop.classList.add('open');
+  }
+
   document.querySelectorAll('[data-tooltip]').forEach(el => {
     el.addEventListener('mousemove', (e) => {
       showTooltip(el.getAttribute('data-tooltip'), e.clientX, e.clientY);
     });
     el.addEventListener('mouseleave', hideTooltip);
+    el.addEventListener('click', (e) => {
+      if (!isMobileLayout()) return;
+      const tipText = el.getAttribute('data-tooltip');
+      if (!tipText) return;
+      const tapX = e.clientX;
+      // Gather any narrow sibling segments within 22px of tapX so narrow bands like 秦 or 24王朝 are always reachable via 44px list
+      let pool = [];
+      if (el.classList.contains('china-seg')) {
+        pool = chinaSegs;
+      } else if (el.classList.contains('tip-dyn-bar')) {
+        pool = tipBars;
+      } else if (el.classList.contains('period-seg')) {
+        pool = egyptPeriodSegs;
+      }
+      if (pool.length) {
+        const nearby = pool.filter(s => {
+          const r = s.getBoundingClientRect();
+          const cx = (r.left + r.right) / 2;
+          return (tapX >= r.left - 24 && tapX <= r.right + 24) || (r.width < 44 && Math.abs(cx - tapX) <= 36);
+        }).map(s => s.getAttribute('data-tooltip')).filter(Boolean);
+        handleMobileTimelineInfoTap(nearby, tipText);
+      } else {
+        showMobileTimelineToast(tipText);
+      }
+    });
+  });
+  chinaEventNodes.forEach(evNode => {
+    evNode.addEventListener('click', (e) => {
+      if (!isMobileLayout()) return;
+      e.stopPropagation();
+      const tapX = e.clientX;
+      const nearbyEvents = chinaEventNodes.filter(n => {
+        const r = n.getBoundingClientRect();
+        return Math.abs(r.left - tapX) <= 26;
+      }).map(n => {
+        const l = n.querySelector('.c-event-label');
+        return l && l.textContent ? ('中國重大歷史事件：' + l.textContent) : '';
+      }).filter(Boolean);
+      const lbl = evNode.querySelector('.c-event-label');
+      const singleTxt = (lbl && lbl.textContent) ? ('中國重大歷史事件：' + lbl.textContent) : '';
+      handleMobileTimelineInfoTap(nearbyEvents, singleTxt);
+    });
   });
 
   // Step Selection (respecting starOnly mode or forced star-only via Shift+Arrow)
@@ -2936,6 +4537,8 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
 
   stagePrevBtn.addEventListener('click', () => stepSelection(-1, false));
   stageNextBtn.addEventListener('click', () => stepSelection(1, false));
+  if (mDockPrevBtn) mDockPrevBtn.addEventListener('click', () => stepSelection(-1, false));
+  if (mDockNextBtn) mDockNextBtn.addEventListener('click', () => stepSelection(1, false));
 
   // Mode Toggle (精選 21 位 ★ ｜ 全部 178)
   function setStarMode(enableStarOnly) {
@@ -2961,8 +4564,15 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       const pct = parseFloat(btn.dataset.pct || '0');
       const targetZoom = parseFloat(btn.dataset.zoom || '3.0');
       const repIdx = parseInt(btn.dataset.rep || '13', 10);
-      setZoom(targetZoom, pct + 3.5);
+      const repIsStar = Boolean(TIMELINE_DATA[repIdx] && (TIMELINE_DATA[repIdx].tag || '').includes('★'));
+      if (isMobileLayout() && starOnly && !repIsStar) {
+        setStarMode(false);
+      }
+      if (!isMobileLayout()) {
+        setZoom(targetZoom, pct + 3.5);
+      }
       selectPharaoh(repIdx, true, true);
+      if (history.replaceState) history.replaceState(null, '', '#sel=' + repIdx);
     });
   });
 
@@ -2979,6 +4589,12 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
         closeLightbox();
       } else if (creditsModal.classList.contains('open')) {
         closeCreditsModal();
+      } else if (mClusterSheetBackdrop && mClusterSheetBackdrop.classList.contains('open')) {
+        closeClusterSheet();
+      } else if (timelineWrapperEl && timelineWrapperEl.classList.contains('m-tl-open')) {
+        closeMobileTimelineModal(false);
+      } else if (searchWrapEl && searchWrapEl.classList.contains('m-search-open')) {
+        closeMobileSearchPanel();
       } else if (searchDropdown.classList.contains('open') || inInput) {
         searchDropdown.classList.remove('open');
         searchInput.blur();
@@ -3044,30 +4660,94 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     viewport.classList.remove('dragging');
   });
 
-  // Touch Pinch Zoom on Timeline
+  // Pointer Events Pinch Zoom on Timeline (anchored at two-finger midpoint, supports 1-finger pan -> 2nd finger join, and resets on pointerup/pointercancel per CR #10 & RV2 #9)
+  const activePointers = new Map();
   let pinchStartDist = 0;
   let pinchStartZoom = 1.0;
   let pinchAnchorPct = 50;
-  viewport.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      pinchStartDist = Math.hypot(dx, dy);
-      pinchStartZoom = zoomLevel;
-      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const rect = viewport.getBoundingClientRect();
-      pinchAnchorPct = ((viewport.scrollLeft + (midX - rect.left)) / stage.clientWidth) * 100.0;
+  let pinchMidViewportX = 0;
+  let pinchRafPending = false;
+  let pendingPinchZoom = 1.0;
+
+  function resetPinchState() {
+    pinchStartDist = 0;
+    pinchRafPending = false;
+  }
+
+  function initTwoPointerPinch() {
+    const pts = Array.from(activePointers.values());
+    if (pts.length < 2) return;
+    const p0 = pts[0];
+    const p1 = pts[1];
+    pinchStartDist = Math.hypot(p0.clientX - p1.clientX, p0.clientY - p1.clientY);
+    pinchStartZoom = zoomLevel;
+    const midX = (p0.clientX + p1.clientX) / 2;
+    const rect = viewport.getBoundingClientRect();
+    pinchMidViewportX = midX - rect.left;
+    const viewW = viewport.clientWidth || window.innerWidth || 390;
+    const curStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
+    pinchAnchorPct = ((viewport.scrollLeft + pinchMidViewportX) / Math.max(1, curStageW)) * 100.0;
+  }
+
+  viewport.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+    if (activePointers.size === 2) {
+      initTwoPointerPinch();
     }
-  }, { passive: true });
-  viewport.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && pinchStartDist > 10) {
-      e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      setZoom(pinchStartZoom * (dist / pinchStartDist), pinchAnchorPct);
+  });
+
+  viewport.addEventListener('pointermove', (e) => {
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+    if (activePointers.size >= 2) {
+      if (pinchStartDist <= 10) {
+        initTwoPointerPinch();
+      }
+      if (pinchStartDist > 10) {
+        const pts = Array.from(activePointers.values());
+        const p0 = pts[0];
+        const p1 = pts[1];
+        const dist = Math.hypot(p0.clientX - p1.clientX, p0.clientY - p1.clientY);
+        const midX = (p0.clientX + p1.clientX) / 2;
+        const rect = viewport.getBoundingClientRect();
+        pinchMidViewportX = midX - rect.left;
+        pendingPinchZoom = Math.max(1.0, Math.min(10.0, pinchStartZoom * (dist / pinchStartDist)));
+        if (!pinchRafPending) {
+          pinchRafPending = true;
+          requestAnimationFrame(() => {
+            pinchRafPending = false;
+            if (pinchStartDist <= 0 || activePointers.size < 2) return;
+            zoomLevel = Math.round(pendingPinchZoom * 100) / 100;
+            zoomReadout.textContent = zoomLevel.toFixed(1) + '×';
+            zoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
+            if (mZoomReadout) mZoomReadout.textContent = zoomLevel.toFixed(1) + '×';
+            if (mZoomResetBtn) mZoomResetBtn.classList.toggle('active', Math.abs(zoomLevel - 1.0) < 0.05);
+            layoutTimeline();
+            const viewW = viewport.clientWidth || window.innerWidth || 390;
+            const newStageW = Math.round(((isMobileLayout() ? viewW : Math.max(viewW, 1440))) * zoomLevel);
+            if (newStageW <= viewW) {
+              viewport.scrollLeft = 0;
+            } else {
+              viewport.scrollLeft = Math.max(0, (pinchAnchorPct / 100.0) * newStageW - pinchMidViewportX);
+            }
+          });
+        }
+      }
     }
-  }, { passive: false });
+  });
+
+  function handlePointerEndOrCancel(e) {
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) {
+      resetPinchState();
+    }
+  }
+  viewport.addEventListener('pointerup', handlePointerEndOrCancel);
+  viewport.addEventListener('pointercancel', handlePointerEndOrCancel);
+  viewport.addEventListener('pointerleave', (e) => {
+    if (e.pointerType !== 'touch') handlePointerEndOrCancel(e);
+  });
 
   // Automated Self-Audit Mode (#audit or ?audit=1) for Acceptance #3 & #5
   async function runAutomatedAudit() {
@@ -3135,6 +4815,8 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     body.setAttribute('data-audit-result', JSON.stringify(report));
   }
 
+  let initialModeInitialized = false;
+
   function applyUrlState() {
     const params = new URLSearchParams(window.location.search);
     const hash = window.location.hash || '';
@@ -3146,6 +4828,7 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
     }
 
     let targetIdx = 13; // Default: 納爾邁 (#13)
+    let hasExplicitSel = false;
     let selParam = params.get('sel');
     const hashMatch = hash.match(/sel=([^&]+)/);
     if (hashMatch) {
@@ -3155,11 +4838,39 @@ const TIMELINE_STORIES = [{"index": 0, "name": "狩獵採集群", "story": "當�
       const asNum = parseInt(selParam, 10);
       if (!isNaN(asNum) && asNum >= 0 && asNum < TIMELINE_DATA.length) {
         targetIdx = asNum;
+        hasExplicitSel = true;
       } else {
         const found = TIMELINE_DATA.findIndex(item => item.name.includes(selParam));
-        if (found >= 0) targetIdx = found;
+        if (found >= 0) {
+          targetIdx = found;
+          hasExplicitSel = true;
+        }
       }
     }
+
+    const targetIsStar = Boolean(TIMELINE_DATA[targetIdx] && (TIMELINE_DATA[targetIdx].tag || '').includes('★'));
+    if (isMobileLayout()) {
+      if (!initialModeInitialized) {
+        initialModeInitialized = true;
+        // Mobile defaults to 精選 21 位 ★ unless deep link specifies a non-★ pharaoh (SPEC_mobile #6)
+        const shouldStarOnly = !(hasExplicitSel && !targetIsStar);
+        starOnly = shouldStarOnly;
+        body.classList.toggle('star-only-mode', starOnly);
+        modeStarBtn.classList.toggle('active', starOnly);
+        modeStarBtn.setAttribute('aria-pressed', starOnly ? 'true' : 'false');
+        modeAllBtn.classList.toggle('active', !starOnly);
+        modeAllBtn.setAttribute('aria-pressed', !starOnly ? 'true' : 'false');
+      } else if (hasExplicitSel && !targetIsStar && starOnly) {
+        // Deep link navigated to a non-★ pharaoh while in starOnly mode -> switch to All
+        starOnly = false;
+        body.classList.remove('star-only-mode');
+        modeStarBtn.classList.remove('active');
+        modeStarBtn.setAttribute('aria-pressed', 'false');
+        modeAllBtn.classList.add('active');
+        modeAllBtn.setAttribute('aria-pressed', 'true');
+      }
+    }
+
     selectPharaoh(targetIdx, true, false);
   }
 
